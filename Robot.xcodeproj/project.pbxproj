@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		26E1E34E199F8D3100197739 /* Bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E1E34C199F8D3100197739 /* Bitmap.cpp */; };
 		26EDF17F199F4BDF00C71FC5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF17E199F4BDF00C71FC5 /* Cocoa.framework */; };
 		26EDF1B1199F4C4900C71FC5 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B0199F4C4900C71FC5 /* OpenGL.framework */; };
 		26EDF1B3199F4C4F00C71FC5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B2199F4C4F00C71FC5 /* IOKit.framework */; };
@@ -20,6 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		26E1E34C199F8D3100197739 /* Bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bitmap.cpp; sourceTree = "<group>"; };
+		26E1E34D199F8D3100197739 /* Bitmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bitmap.h; sourceTree = "<group>"; };
 		26EDF176199F4AB100C71FC5 /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		26EDF17C199F4BDF00C71FC5 /* Robot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Robot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		26EDF17E199F4BDF00C71FC5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -76,6 +79,8 @@
 				26EDF1C0199F598E00C71FC5 /* Shader.cpp */,
 				26EDF1C1199F598E00C71FC5 /* Shader.h */,
 				26EDF1C3199F676500C71FC5 /* ShaderProgram.cpp */,
+				26E1E34C199F8D3100197739 /* Bitmap.cpp */,
+				26E1E34D199F8D3100197739 /* Bitmap.h */,
 				26EDF1C4199F676500C71FC5 /* ShaderProgram.h */,
 			);
 			path = source;
@@ -165,6 +170,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26E1E34E199F8D3100197739 /* Bitmap.cpp in Sources */,
 				26EDF1C5199F676500C71FC5 /* ShaderProgram.cpp in Sources */,
 				26EDF1C2199F598E00C71FC5 /* Shader.cpp in Sources */,
 				26EDF1B8199F4D3300C71FC5 /* main.mm in Sources */,
