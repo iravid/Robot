@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		260D24D9199FBA9800AC2A21 /* brick_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 260D24D7199FBA9800AC2A21 /* brick_texture.jpg */; };
+		260D24DA199FBA9800AC2A21 /* concrete_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 260D24D8199FBA9800AC2A21 /* concrete_texture.jpg */; };
 		26E1E34E199F8D3100197739 /* Bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E1E34C199F8D3100197739 /* Bitmap.cpp */; };
 		26E1E351199F950400197739 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E1E34F199F950400197739 /* Texture.cpp */; };
 		26E1E354199F9EA600197739 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E1E352199F9EA600197739 /* Camera.cpp */; };
@@ -23,6 +25,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		260D24D7199FBA9800AC2A21 /* brick_texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = brick_texture.jpg; sourceTree = "<group>"; };
+		260D24D8199FBA9800AC2A21 /* concrete_texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = concrete_texture.jpg; sourceTree = "<group>"; };
 		26E1E34C199F8D3100197739 /* Bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bitmap.cpp; sourceTree = "<group>"; };
 		26E1E34D199F8D3100197739 /* Bitmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bitmap.h; sourceTree = "<group>"; };
 		26E1E34F199F950400197739 /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = "<group>"; };
@@ -60,9 +64,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		260D24D6199FBA9800AC2A21 /* textures */ = {
+			isa = PBXGroup;
+			children = (
+				260D24D7199FBA9800AC2A21 /* brick_texture.jpg */,
+				260D24D8199FBA9800AC2A21 /* concrete_texture.jpg */,
+			);
+			name = textures;
+			path = resources/textures;
+			sourceTree = "<group>";
+		};
 		26EDF15D199F49F800C71FC5 = {
 			isa = PBXGroup;
 			children = (
+				260D24D6199FBA9800AC2A21 /* textures */,
 				26EDF1BB199F568D00C71FC5 /* resources */,
 				26EDF174199F4AB100C71FC5 /* source */,
 				26EDF17D199F4BDF00C71FC5 /* Frameworks */,
@@ -170,6 +185,8 @@
 			files = (
 				26EDF1BD199F56A900C71FC5 /* fragment-shader.fsh in Resources */,
 				26EDF1BF199F56B400C71FC5 /* vertex-shader.vsh in Resources */,
+				260D24DA199FBA9800AC2A21 /* concrete_texture.jpg in Resources */,
+				260D24D9199FBA9800AC2A21 /* brick_texture.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

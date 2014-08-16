@@ -20,7 +20,7 @@ Shader::Shader(const std::string& source, GLenum shaderType) : _handle(0), _refC
     
     // Set the source
     const char *code = source.c_str();
-    glShaderSource(_handle, 1, (const GLchar **) code, nullptr);
+    glShaderSource(_handle, 1, (const char **) &code, NULL);
     
     // Compile
     glCompileShader(_handle);

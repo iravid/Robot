@@ -12,6 +12,7 @@
 #include <stdlib.h>
 
 #define STBI_FAILURE_USERMSG
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 inline unsigned char AverageRGB(unsigned char rgb[3]) {

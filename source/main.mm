@@ -8,16 +8,17 @@
 
 #import <Foundation/Foundation.h>
 #include <iostream>
+#include <list>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "ShaderProgram.h"
 #include "Shader.h"
 #include "Texture.h"
-
-const glm::vec2 SCREEN_SIZE(1024, 768);
+#include "Camera.h"
 
 struct Model {
     ShaderProgram *shaders;
@@ -49,7 +50,7 @@ struct ModelInstance {
     // The transformation to be applied to this instance
     glm::mat4 transform;
     
-    ModelInstance() : model(nullptr), transform() {}
+    ModelInstance() : model(nullptr), transform(glm::mat4()) {}
 };
 
 struct Light {
@@ -62,6 +63,10 @@ struct Light {
     // Ambience coefficient
     float ambientCoefficient;
 };
+
+const glm::vec2 SCREEN_SIZE(1680, 1050);
+Light light;
+Camera camera;
 
 // returns the full path to the file `fileName` in the resources directory of the app bundle
 static std::string ResourcePath(std::string fileName) {
@@ -83,6 +88,136 @@ static Texture *textureFromFile(const char *textureFilename) {
     return new Texture(bmp);
 }
 
+static void loadFloorModel(Model& floor) {
+    floor.shaders = programWithShaders("vertex-shader.vsh", "fragment-shader.fsh");
+    floor.drawType = GL_TRIANGLES;
+    floor.drawStart = 0;
+    floor.drawCount = 6;
+    floor.shininess = 80.0f;
+    floor.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    floor.texture = textureFromFile("concrete_texture.jpg");
+    
+    // Generate buffers and vertex arrays
+    glGenBuffers(1, &floor.vbo);
+    glGenVertexArrays(1, &floor.vao);
+    
+    // Bind the vertex array
+    glBindVertexArray(floor.vao);
+    
+    // Bind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, floor.vbo);
+    
+    GLfloat floorVertexData[] = {
+    //    X     Y     Z     U     V    Normal
+    //  first triangle
+        -1.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.5f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    //  second triangle
+        1.5f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -1.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -1.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
+    };
+    
+    // Copy vertex data to OpenGL buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertexData), floorVertexData, GL_STATIC_DRAW);
+    
+    // Point the vert in-parameter of the vertex shader to the first 3 elements of every 5 elements in the array
+    glEnableVertexAttribArray(floor.shaders->attrib("vert"));
+    glVertexAttribPointer(floor.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+    
+    // Same thing, but point vertTextureCoord to last 2 elements of every 5 elements
+    glEnableVertexAttribArray(floor.shaders->attrib("vertTextureCoord"));
+    glVertexAttribPointer(floor.shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
+    
+    glEnableVertexAttribArray(floor.shaders->attrib("vertNormal"));
+    glVertexAttribPointer(floor.shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
+    
+    // Unbind the VAO
+    glBindVertexArray(0);
+}
+
+static void loadWallModel(Model& wall) {
+    wall.shaders = programWithShaders("vertex-shader.vsh", "fragment-shader.fsh");
+    wall.drawType = GL_TRIANGLES;
+    wall.drawStart = 0;
+    wall.drawCount = 6;
+    wall.shininess = 100.0f;
+    wall.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    wall.texture = textureFromFile("brick_texture.jpg");
+    
+    glGenBuffers(1, &wall.vbo);
+    glGenVertexArrays(1, &wall.vao);
+    
+    glBindVertexArray(wall.vao);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, wall.vbo);
+    
+    GLfloat wallVertexData[] = {
+        // First triangle
+    //    X      Y     Z     U     V     Xn    Yn    Zn
+        -1.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -1.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        // Second triangle
+        1.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.5f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -1.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+    };
+    
+    glBufferData(GL_ARRAY_BUFFER, sizeof(wallVertexData), wallVertexData, GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(wall.shaders->attrib("vert"));
+    glVertexAttribPointer(wall.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+    
+    glEnableVertexAttribArray(wall.shaders->attrib("vertTextureCoord"));
+    glVertexAttribPointer(wall.shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
+    
+    glEnableVertexAttribArray(wall.shaders->attrib("vertNormal"));
+    glVertexAttribPointer(wall.shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
+    
+    glBindVertexArray(0);
+}
+
+static void createInstances(std::list<ModelInstance>& instanceList) {
+    Model floorModel;
+    loadFloorModel(floorModel);
+    
+    ModelInstance floorInstance;
+    floorInstance.model = new Model();
+    memcpy(floorInstance.model, &floorModel, sizeof(Model));
+    floorInstance.transform = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
+    instanceList.push_back(floorInstance);
+    
+    Model wallModel;
+    loadWallModel(wallModel);
+    
+    ModelInstance frontWall;
+    frontWall.model = new Model();
+    memcpy(frontWall.model, &wallModel, sizeof(Model));
+    frontWall.transform = glm::translate(glm::mat4(), glm::vec3(0, 4, -4)) * glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
+    instanceList.push_back(frontWall);
+    
+    ModelInstance leftWall;
+    leftWall.model = new Model();
+    memcpy(leftWall.model, &wallModel, sizeof(Model));
+    // Rotation by negative amount of degrees is needed in order to preserve the direction of the surface normal
+    leftWall.transform = glm::translate(glm::mat4(), glm::vec3(-6, 4, 0)) * glm::scale(glm::mat4(), glm::vec3(0.0f, 4.0f, 4.0f / 1.5f)) * glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
+    instanceList.push_back(leftWall);
+
+    ModelInstance backWall;
+    backWall.model = new Model();
+    memcpy(backWall.model, &wallModel, sizeof(Model));
+    backWall.transform = glm::translate(glm::mat4(), glm::vec3(0, 4, 4)) * glm::scale(glm::mat4(), glm::vec3(4, 4, 0)) * glm::rotate(glm::mat4(), -180.0f, glm::vec3(0, 1.0f, 0));
+    instanceList.push_back(backWall);
+    
+    ModelInstance rightWall;
+    rightWall.model = new Model();
+    memcpy(rightWall.model, &wallModel, sizeof(Model));
+    rightWall.transform = glm::translate(glm::mat4(), glm::vec3(6, 4, 0)) * glm::scale(glm::mat4(), glm::vec3(0.0f, 4.0f, 4.0f / 1.5f)) * glm::rotate(glm::mat4(), -270.0f, glm::vec3(0, 1.0f, 0));
+    instanceList.push_back(rightWall);
+}
+
 static void glfwErrorCallbackFunc(int error, const char *desc) {
     std::cerr << "GLFW error description:" << std::endl << desc << std::endl;
 }
@@ -96,9 +231,47 @@ void updatePositions() {
     
 }
 
-void renderFrame() {
+// Render a single instance
+void renderInstance(const ModelInstance& instance) {
+    Model *model = instance.model;
+    ShaderProgram *shaders = model->shaders;
+    
+    // Start using the shader program
+    shaders->use();
+    
+    // Set the uniforms
+    shaders->setUniform("camera", camera.matrix());
+    shaders->setUniform("model", instance.transform);
+    shaders->setUniform("materialTexture", 0);
+    shaders->setUniform("materialShininess", model->shininess);
+    shaders->setUniform("materialSpecularColor", model->specularColor);
+    shaders->setUniform("light.position", light.position);
+    shaders->setUniform("light.intensities", light.intensities);
+    shaders->setUniform("light.attentuation", light.attentuation);
+    shaders->setUniform("light.ambientCoefficient", light.ambientCoefficient);
+    shaders->setUniform("cameraPosition", camera.position());
+    
+    // Bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, model->texture->handle());
+    
+    // Bind VAO and draw
+    glBindVertexArray(model->vao);
+    glDrawArrays(model->drawType, model->drawStart, model->drawCount);
+    
+    // Unbind everything
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    shaders->stopUsing();
+}
+
+void renderFrame(const std::list<ModelInstance>& instances) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    std::list<ModelInstance>::const_iterator it;
+    for (it = instances.begin(); it != instances.end(); ++it)
+        renderInstance(*it);
 }
 
 void AppMain() {
@@ -118,7 +291,7 @@ void AppMain() {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     
     // Create the window
-    window = glfwCreateWindow(1024, 768, "Robot", nullptr, nullptr);
+    window = glfwCreateWindow(SCREEN_SIZE.x, SCREEN_SIZE.y, "Robot", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         throw std::runtime_error("Error creating GLFW window");
@@ -153,9 +326,25 @@ void AppMain() {
         
     glfwSetKeyCallback(window, glfwKeyCallbackFunc);
     
+    std::list<ModelInstance> instances;
+    createInstances(instances);
+    
+    // Orient camera
+    camera.setPosition(glm::vec3(0, 2, 0));
+    camera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+    camera.setNearAndFarPlanes(0.2f, 100.0f);
+    camera.setFieldOfView(120.0f);
+    camera.lookAt(glm::vec3(0, 2, -4));
+    
+    // Setup light source parameters
+    light.position = glm::vec3(0, 4, 0);
+    light.intensities = glm::vec3(1.0f, 1.0f, 1.0f); // white
+    light.attentuation = 0.002f;
+    light.ambientCoefficient = 0.005f;
+    
     while (!glfwWindowShouldClose(window)) {
         updatePositions();
-        renderFrame();
+        renderFrame(instances);
         glfwSwapBuffers(window);
         
         GLenum error = glGetError();
