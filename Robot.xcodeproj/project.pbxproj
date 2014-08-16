@@ -16,8 +16,8 @@
 		26EDF1B5199F4C6100C71FC5 /* libGLEW.1.10.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B4199F4C6100C71FC5 /* libGLEW.1.10.0.dylib */; };
 		26EDF1B7199F4C8400C71FC5 /* libglfw.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B6199F4C8400C71FC5 /* libglfw.3.0.dylib */; };
 		26EDF1B8199F4D3300C71FC5 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26EDF176199F4AB100C71FC5 /* main.mm */; };
-		26EDF1BD199F56A900C71FC5 /* fragment-shader.txt in Resources */ = {isa = PBXBuildFile; fileRef = 26EDF1BC199F56A900C71FC5 /* fragment-shader.txt */; };
-		26EDF1BF199F56B400C71FC5 /* vertex-shader.txt in Resources */ = {isa = PBXBuildFile; fileRef = 26EDF1BE199F56B400C71FC5 /* vertex-shader.txt */; };
+		26EDF1BD199F56A900C71FC5 /* fragment-shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 26EDF1BC199F56A900C71FC5 /* fragment-shader.fsh */; };
+		26EDF1BF199F56B400C71FC5 /* vertex-shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 26EDF1BE199F56B400C71FC5 /* vertex-shader.vsh */; };
 		26EDF1C2199F598E00C71FC5 /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EDF1C0199F598E00C71FC5 /* Shader.cpp */; };
 		26EDF1C5199F676500C71FC5 /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EDF1C3199F676500C71FC5 /* ShaderProgram.cpp */; };
 /* End PBXBuildFile section */
@@ -36,8 +36,8 @@
 		26EDF1B2199F4C4F00C71FC5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		26EDF1B4199F4C6100C71FC5 /* libGLEW.1.10.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.10.0.dylib; path = ../../../../../usr/local/lib/libGLEW.1.10.0.dylib; sourceTree = "<group>"; };
 		26EDF1B6199F4C8400C71FC5 /* libglfw.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.0.dylib; path = ../../../../../usr/local/lib/libglfw.3.0.dylib; sourceTree = "<group>"; };
-		26EDF1BC199F56A900C71FC5 /* fragment-shader.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "fragment-shader.txt"; sourceTree = "<group>"; };
-		26EDF1BE199F56B400C71FC5 /* vertex-shader.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "vertex-shader.txt"; sourceTree = "<group>"; };
+		26EDF1BC199F56A900C71FC5 /* fragment-shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = "fragment-shader.fsh"; sourceTree = "<group>"; };
+		26EDF1BE199F56B400C71FC5 /* vertex-shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = "vertex-shader.vsh"; sourceTree = "<group>"; };
 		26EDF1C0199F598E00C71FC5 /* Shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Shader.cpp; sourceTree = "<group>"; };
 		26EDF1C1199F598E00C71FC5 /* Shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shader.h; sourceTree = "<group>"; };
 		26EDF1C3199F676500C71FC5 /* ShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
@@ -111,8 +111,8 @@
 		26EDF1BB199F568D00C71FC5 /* resources */ = {
 			isa = PBXGroup;
 			children = (
-				26EDF1BC199F56A900C71FC5 /* fragment-shader.txt */,
-				26EDF1BE199F56B400C71FC5 /* vertex-shader.txt */,
+				26EDF1BC199F56A900C71FC5 /* fragment-shader.fsh */,
+				26EDF1BE199F56B400C71FC5 /* vertex-shader.vsh */,
 			);
 			path = resources;
 			sourceTree = "<group>";
@@ -168,8 +168,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26EDF1BD199F56A900C71FC5 /* fragment-shader.txt in Resources */,
-				26EDF1BF199F56B400C71FC5 /* vertex-shader.txt in Resources */,
+				26EDF1BD199F56A900C71FC5 /* fragment-shader.fsh in Resources */,
+				26EDF1BF199F56B400C71FC5 /* vertex-shader.vsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
