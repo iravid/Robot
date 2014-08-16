@@ -6,14 +6,123 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		26EDF17F199F4BDF00C71FC5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF17E199F4BDF00C71FC5 /* Cocoa.framework */; };
+		26EDF1B1199F4C4900C71FC5 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B0199F4C4900C71FC5 /* OpenGL.framework */; };
+		26EDF1B3199F4C4F00C71FC5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B2199F4C4F00C71FC5 /* IOKit.framework */; };
+		26EDF1B5199F4C6100C71FC5 /* libGLEW.1.10.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B4199F4C6100C71FC5 /* libGLEW.1.10.0.dylib */; };
+		26EDF1B7199F4C8400C71FC5 /* libglfw.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26EDF1B6199F4C8400C71FC5 /* libglfw.3.0.dylib */; };
+		26EDF1B8199F4D3300C71FC5 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26EDF176199F4AB100C71FC5 /* main.mm */; };
+		26EDF1BD199F56A900C71FC5 /* fragment-shader.txt in Resources */ = {isa = PBXBuildFile; fileRef = 26EDF1BC199F56A900C71FC5 /* fragment-shader.txt */; };
+		26EDF1BF199F56B400C71FC5 /* vertex-shader.txt in Resources */ = {isa = PBXBuildFile; fileRef = 26EDF1BE199F56B400C71FC5 /* vertex-shader.txt */; };
+		26EDF1C2199F598E00C71FC5 /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EDF1C0199F598E00C71FC5 /* Shader.cpp */; };
+		26EDF1C5199F676500C71FC5 /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EDF1C3199F676500C71FC5 /* ShaderProgram.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		26EDF176199F4AB100C71FC5 /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		26EDF17C199F4BDF00C71FC5 /* Robot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Robot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		26EDF17E199F4BDF00C71FC5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		26EDF1B0199F4C4900C71FC5 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		26EDF1B2199F4C4F00C71FC5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		26EDF1B4199F4C6100C71FC5 /* libGLEW.1.10.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.10.0.dylib; path = ../../../../../usr/local/lib/libGLEW.1.10.0.dylib; sourceTree = "<group>"; };
+		26EDF1B6199F4C8400C71FC5 /* libglfw.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.0.dylib; path = ../../../../../usr/local/lib/libglfw.3.0.dylib; sourceTree = "<group>"; };
+		26EDF1BC199F56A900C71FC5 /* fragment-shader.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "fragment-shader.txt"; sourceTree = "<group>"; };
+		26EDF1BE199F56B400C71FC5 /* vertex-shader.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "vertex-shader.txt"; sourceTree = "<group>"; };
+		26EDF1C0199F598E00C71FC5 /* Shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Shader.cpp; sourceTree = "<group>"; };
+		26EDF1C1199F598E00C71FC5 /* Shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shader.h; sourceTree = "<group>"; };
+		26EDF1C3199F676500C71FC5 /* ShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
+		26EDF1C4199F676500C71FC5 /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		26EDF179199F4BDF00C71FC5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26EDF1B7199F4C8400C71FC5 /* libglfw.3.0.dylib in Frameworks */,
+				26EDF1B5199F4C6100C71FC5 /* libGLEW.1.10.0.dylib in Frameworks */,
+				26EDF1B3199F4C4F00C71FC5 /* IOKit.framework in Frameworks */,
+				26EDF1B1199F4C4900C71FC5 /* OpenGL.framework in Frameworks */,
+				26EDF17F199F4BDF00C71FC5 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
 		26EDF15D199F49F800C71FC5 = {
 			isa = PBXGroup;
 			children = (
+				26EDF1BB199F568D00C71FC5 /* resources */,
+				26EDF174199F4AB100C71FC5 /* source */,
+				26EDF17D199F4BDF00C71FC5 /* Frameworks */,
+				26EDF16B199F4A6D00C71FC5 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
+		26EDF16B199F4A6D00C71FC5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				26EDF17C199F4BDF00C71FC5 /* Robot.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		26EDF174199F4AB100C71FC5 /* source */ = {
+			isa = PBXGroup;
+			children = (
+				26EDF176199F4AB100C71FC5 /* main.mm */,
+				26EDF1C0199F598E00C71FC5 /* Shader.cpp */,
+				26EDF1C1199F598E00C71FC5 /* Shader.h */,
+				26EDF1C3199F676500C71FC5 /* ShaderProgram.cpp */,
+				26EDF1C4199F676500C71FC5 /* ShaderProgram.h */,
+			);
+			path = source;
+			sourceTree = "<group>";
+		};
+		26EDF17D199F4BDF00C71FC5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				26EDF1B6199F4C8400C71FC5 /* libglfw.3.0.dylib */,
+				26EDF1B4199F4C6100C71FC5 /* libGLEW.1.10.0.dylib */,
+				26EDF1B2199F4C4F00C71FC5 /* IOKit.framework */,
+				26EDF1B0199F4C4900C71FC5 /* OpenGL.framework */,
+				26EDF17E199F4BDF00C71FC5 /* Cocoa.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		26EDF1BB199F568D00C71FC5 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				26EDF1BC199F56A900C71FC5 /* fragment-shader.txt */,
+				26EDF1BE199F56B400C71FC5 /* vertex-shader.txt */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		26EDF17B199F4BDF00C71FC5 /* Robot */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 26EDF1AA199F4BDF00C71FC5 /* Build configuration list for PBXNativeTarget "Robot" */;
+			buildPhases = (
+				26EDF178199F4BDF00C71FC5 /* Sources */,
+				26EDF179199F4BDF00C71FC5 /* Frameworks */,
+				26EDF17A199F4BDF00C71FC5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Robot;
+			productName = Robot;
+			productReference = 26EDF17C199F4BDF00C71FC5 /* Robot.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		26EDF15E199F49F800C71FC5 /* Project object */ = {
@@ -27,25 +136,149 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 26EDF15D199F49F800C71FC5;
+			productRefGroup = 26EDF16B199F4A6D00C71FC5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				26EDF17B199F4BDF00C71FC5 /* Robot */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		26EDF17A199F4BDF00C71FC5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26EDF1BD199F56A900C71FC5 /* fragment-shader.txt in Resources */,
+				26EDF1BF199F56B400C71FC5 /* vertex-shader.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		26EDF178199F4BDF00C71FC5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26EDF1C5199F676500C71FC5 /* ShaderProgram.cpp in Sources */,
+				26EDF1C2199F598E00C71FC5 /* Shader.cpp in Sources */,
+				26EDF1B8199F4D3300C71FC5 /* main.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		26EDF162199F49F800C71FC5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 			};
 			name = Debug;
 		};
 		26EDF163199F49F800C71FC5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+			};
+			name = Release;
+		};
+		26EDF1AB199F4BDF00C71FC5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		26EDF1AC199F4BDF00C71FC5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
 		};
@@ -57,6 +290,15 @@
 			buildConfigurations = (
 				26EDF162199F49F800C71FC5 /* Debug */,
 				26EDF163199F49F800C71FC5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		26EDF1AA199F4BDF00C71FC5 /* Build configuration list for PBXNativeTarget "Robot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				26EDF1AB199F4BDF00C71FC5 /* Debug */,
+				26EDF1AC199F4BDF00C71FC5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
