@@ -13,7 +13,75 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "ShaderProgram.h"
+#include "Shader.h"
+#include "Texture.h"
+
 const glm::vec2 SCREEN_SIZE(1024, 768);
+
+struct Model {
+    ShaderProgram *shaders;
+    Texture *texture;
+    
+    GLuint vbo;
+    GLuint vao;
+    
+    // Vertex parameters
+    GLenum drawType;
+    GLint drawStart;
+    GLint drawCount;
+    
+    // Lighting parameters
+    GLfloat shininess;
+    glm::vec3 specularColor;
+    
+    // Constructor
+    Model() :
+        shaders(nullptr), texture(nullptr),
+        vbo(0), vao(0),
+        drawType(GL_TRIANGLES), drawStart(0), drawCount(0),
+        shininess(0.0f), specularColor(1.0f, 1.0f, 1.0f) {}
+};
+
+struct ModelInstance {
+    // The model itself
+    Model *model;
+    // The transformation to be applied to this instance
+    glm::mat4 transform;
+    
+    ModelInstance() : model(nullptr), transform() {}
+};
+
+struct Light {
+    // Light position
+    glm::vec3 position;
+    // Light color
+    glm::vec3 intensities;
+    // Attentuation coefficient
+    float attentuation;
+    // Ambience coefficient
+    float ambientCoefficient;
+};
+
+// returns the full path to the file `fileName` in the resources directory of the app bundle
+static std::string ResourcePath(std::string fileName) {
+    NSString* fname = [NSString stringWithCString:fileName.c_str() encoding:NSUTF8StringEncoding];
+    NSString* path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:fname];
+    return std::string([path cStringUsingEncoding:NSUTF8StringEncoding]);
+}
+
+static ShaderProgram *programWithShaders(const char *vertexShaderFilename, const char *fragmentShaderFilename) {
+    std::vector<Shader> shaders;
+    shaders.push_back(Shader::shaderFromFile(ResourcePath(vertexShaderFilename), GL_VERTEX_SHADER));
+    shaders.push_back(Shader::shaderFromFile(ResourcePath(fragmentShaderFilename), GL_FRAGMENT_SHADER));
+    return new ShaderProgram(shaders);
+}
+
+static Texture *textureFromFile(const char *textureFilename) {
+    Bitmap bmp = Bitmap::bitmapFromFile(ResourcePath(textureFilename));
+    bmp.flipVertically();
+    return new Texture(bmp);
+}
 
 static void glfwErrorCallbackFunc(int error, const char *desc) {
     std::cerr << "GLFW error description:" << std::endl << desc << std::endl;
@@ -22,6 +90,15 @@ static void glfwErrorCallbackFunc(int error, const char *desc) {
 static void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+void updatePositions() {
+    
+}
+
+void renderFrame() {
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void AppMain() {
@@ -77,10 +154,14 @@ void AppMain() {
     glfwSetKeyCallback(window, glfwKeyCallbackFunc);
     
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+        updatePositions();
+        renderFrame();
         glfwSwapBuffers(window);
+        
+        GLenum error = glGetError();
+        if (error != GL_NO_ERROR)
+            std::cerr << "OpenGL error " << error << ": " << (const char *) gluErrorString(error) << std::endl;
+        
         glfwPollEvents();
     }
     

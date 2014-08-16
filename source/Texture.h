@@ -17,8 +17,7 @@ public:
     /* Creates a Texture from a Bitmap. The texture will be loaded upside down since Bitmap pixel data is ordered
      * column-major, from the top-row downwards, but OpenGL expects the data to be ordered bottom-row upwards.
      * minMagFiler should be either GL_LINEAR/GL_NEAREST, wrapMode should be GL_REPEAT/GL_MIRRORED_REPEAT/GL_CLAMP_TO_EDGE/GL_CLAMP_TO_BORDER. */
-    Texture(const Bitmap& bitmap, GLint minMagFiler, GLint wrapMode);
-    
+    Texture(const Bitmap& bitmap, GLint minMagFiler = GL_LINEAR, GLint wrapMode = GL_CLAMP_TO_EDGE);
     ~Texture();
     
     // Returns the OpenGL handle
