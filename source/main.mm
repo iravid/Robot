@@ -44,13 +44,22 @@ struct Model {
         shininess(0.0f), specularColor(1.0f, 1.0f, 1.0f) {}
 };
 
+struct ModelTransform {
+    glm::mat4 scale;
+    glm::mat4 rotate;
+    glm::mat4 translate;
+    
+    ModelTransform() : scale(), rotate(), translate() {}
+    glm::mat4 matrix() const { return translate * rotate * scale; }
+};
+
 struct ModelInstance {
     // The model itself
     Model *model;
     // The transformation to be applied to this instance
-    glm::mat4 transform;
+    ModelTransform transform;
     
-    ModelInstance() : model(nullptr), transform(glm::mat4()) {}
+    ModelInstance() : model(nullptr), transform() {}
 };
 
 struct Light {
@@ -153,6 +162,7 @@ static void loadWallModel(Model& wall) {
     
     glBindBuffer(GL_ARRAY_BUFFER, wall.vbo);
     
+    // Wall quad: (-1.5, -1), (-1.5, 1), (1.5, 1), (1.5, -1)
     GLfloat wallVertexData[] = {
         // First triangle
     //    X      Y     Z     U     V     Xn    Yn    Zn
@@ -186,35 +196,51 @@ static void createInstances(std::list<ModelInstance>& instanceList) {
     ModelInstance floorInstance;
     floorInstance.model = new Model();
     memcpy(floorInstance.model, &floorModel, sizeof(Model));
-    floorInstance.transform = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
+    floorInstance.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
     instanceList.push_back(floorInstance);
+    
+    ModelInstance ceilingInstance;
+    ceilingInstance.model = new Model();
+    memcpy(ceilingInstance.model, &floorModel, sizeof(Model));
+    // Transform order: TRS
+    ceilingInstance.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
+    ceilingInstance.transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    ceilingInstance.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 8, 0));
+    instanceList.push_back(ceilingInstance);
     
     Model wallModel;
     loadWallModel(wallModel);
     
+    ModelInstance backWall;
+    backWall.model = new Model();
+    memcpy(backWall.model, &wallModel, sizeof(Model));
+    backWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
+    backWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, -4));
+    instanceList.push_back(backWall);
+    
     ModelInstance frontWall;
     frontWall.model = new Model();
     memcpy(frontWall.model, &wallModel, sizeof(Model));
-    frontWall.transform = glm::translate(glm::mat4(), glm::vec3(0, 4, -4)) * glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
+    frontWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
+    frontWall.transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(0, 1.0f, 0));
+    frontWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, 4));
     instanceList.push_back(frontWall);
     
     ModelInstance leftWall;
     leftWall.model = new Model();
     memcpy(leftWall.model, &wallModel, sizeof(Model));
     // Rotation by negative amount of degrees is needed in order to preserve the direction of the surface normal
-    leftWall.transform = glm::translate(glm::mat4(), glm::vec3(-6, 4, 0)) * glm::scale(glm::mat4(), glm::vec3(0.0f, 4.0f, 4.0f / 1.5f)) * glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
+    leftWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
+    leftWall.transform.rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(0, 1.0f, 0));
+    leftWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(-6, 4, 0));
     instanceList.push_back(leftWall);
-
-    ModelInstance backWall;
-    backWall.model = new Model();
-    memcpy(backWall.model, &wallModel, sizeof(Model));
-    backWall.transform = glm::translate(glm::mat4(), glm::vec3(0, 4, 4)) * glm::scale(glm::mat4(), glm::vec3(4, 4, 0)) * glm::rotate(glm::mat4(), -180.0f, glm::vec3(0, 1.0f, 0));
-    instanceList.push_back(backWall);
     
     ModelInstance rightWall;
     rightWall.model = new Model();
     memcpy(rightWall.model, &wallModel, sizeof(Model));
-    rightWall.transform = glm::translate(glm::mat4(), glm::vec3(6, 4, 0)) * glm::scale(glm::mat4(), glm::vec3(0.0f, 4.0f, 4.0f / 1.5f)) * glm::rotate(glm::mat4(), -270.0f, glm::vec3(0, 1.0f, 0));
+    rightWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
+    rightWall.transform.rotate = glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
+    rightWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(6, 4, 0));
     instanceList.push_back(rightWall);
 }
 
@@ -225,6 +251,23 @@ static void glfwErrorCallbackFunc(int error, const char *desc) {
 static void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+    
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+        if (light.ambientCoefficient < 1.0f)
+            light.ambientCoefficient += 1.0f;
+        else
+            light.ambientCoefficient -= 1.0f;
+    }
+    
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+        camera.offsetOrientation(-5.0f, 0.0f);
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+        camera.offsetOrientation(5.0f, 0.0f);
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+        camera.offsetOrientation(0.0f, 5.0f);
+    if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+        camera.offsetOrientation(0.0f, -5.0f);
+    
 }
 
 void updatePositions() {
@@ -241,7 +284,8 @@ void renderInstance(const ModelInstance& instance) {
     
     // Set the uniforms
     shaders->setUniform("camera", camera.matrix());
-    shaders->setUniform("model", instance.transform);
+    shaders->setUniform("model", instance.transform.matrix());
+    shaders->setUniform("normalRotationMatrix", instance.transform.rotate);
     shaders->setUniform("materialTexture", 0);
     shaders->setUniform("materialShininess", model->shininess);
     shaders->setUniform("materialSpecularColor", model->specularColor);

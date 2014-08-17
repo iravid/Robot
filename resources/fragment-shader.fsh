@@ -1,6 +1,7 @@
 #version 150
 
 uniform mat4 model;
+uniform mat4 normalRotationMatrix;
 uniform vec3 cameraPosition;
 
 // Material settings
@@ -23,7 +24,7 @@ in vec3 fragVert;
 out vec4 finalColor;
 
 void main() {
-    vec3 normal = normalize(transpose(inverse(mat3(model))) * fragNormal);
+    vec3 normal = mat3(normalRotationMatrix) * fragNormal;
     vec3 surfacePos = vec3(model * vec4(fragVert, 1));
     vec4 surfaceColor = texture(materialTexture, fragTextureCoord);
     vec3 surfaceToLight = normalize(light.position - surfacePos);
