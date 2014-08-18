@@ -32,6 +32,7 @@
 		26D82A5719A259DE00547694 /* MatrixStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MatrixStack.h; sourceTree = "<group>"; };
 		26D82A5919A2605C00547694 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
 		26D82A5A19A260A200547694 /* Model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
+		26D82A5B19A2634F00547694 /* RenderNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderNode.h; sourceTree = "<group>"; };
 		26E1E34C199F8D3100197739 /* Bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bitmap.cpp; sourceTree = "<group>"; };
 		26E1E34D199F8D3100197739 /* Bitmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bitmap.h; sourceTree = "<group>"; };
 		26E1E34F199F950400197739 /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = "<group>"; };
@@ -102,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				26EDF176199F4AB100C71FC5 /* main.mm */,
+				26D82A5B19A2634F00547694 /* RenderNode.h */,
 				26D82A5A19A260A200547694 /* Model.h */,
 				26D82A5919A2605C00547694 /* Light.h */,
 				26D82A5619A259DE00547694 /* MatrixStack.cpp */,

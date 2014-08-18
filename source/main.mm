@@ -21,6 +21,8 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Model.h"
+#include "MatrixStack.h"
+#include "RenderNode.h"
 
 const glm::vec2 SCREEN_SIZE(1680, 1050);
 Light light;
@@ -226,7 +228,7 @@ void updatePositions() {
 }
 
 // Render a single instance
-void renderInstance(const ModelInstance& instance) {
+void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransform, const glm::mat4 normalRotationMatrix) {
     Model *model = instance.model;
     ShaderProgram *shaders = model->shaders;
     
@@ -235,8 +237,8 @@ void renderInstance(const ModelInstance& instance) {
     
     // Set the uniforms
     shaders->setUniform("camera", camera.matrix());
-    shaders->setUniform("model", instance.transform.matrix());
-    shaders->setUniform("normalRotationMatrix", instance.transform.rotate);
+    shaders->setUniform("model", modelTransform);
+    shaders->setUniform("normalRotationMatrix", normalRotationMatrix);
     shaders->setUniform("materialTexture", 0);
     shaders->setUniform("materialShininess", model->shininess);
     shaders->setUniform("materialSpecularColor", model->specularColor);
@@ -260,13 +262,32 @@ void renderInstance(const ModelInstance& instance) {
     shaders->stopUsing();
 }
 
+void renderRecursive(const RenderNode& node, MatrixStack& modelTransformStack, MatrixStack& normalRotationStack) {
+    // Push the whole model matrix and the normal rotation separately onto the stack; we need to compute
+    // the overall rotation matrix in order to calculate the lighting properly for the model's surface
+    modelTransformStack.push(node.instance->transform.matrix());
+    normalRotationStack.push(node.instance->transform.rotate);
+    
+    // Render all children recursively
+    std::list<RenderNode>::const_iterator it;
+    for (it = node.children.begin(); it != node.children.end(); ++it)
+        renderRecursive(*it, modelTransformStack, normalRotationStack);
+    
+    // Render this instance
+    renderInstance(*node.instance, modelTransformStack.multiplyMatrices(), normalRotationStack.multiplyMatrices());
+    
+    // Pop the matrices
+    modelTransformStack.pop();
+    normalRotationStack.pop();
+}
+
 void renderFrame(const std::list<ModelInstance>& instances) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     std::list<ModelInstance>::const_iterator it;
     for (it = instances.begin(); it != instances.end(); ++it)
-        renderInstance(*it);
+        renderInstance(*it, it->transform.matrix(), it->transform.rotate);
 }
 
 void AppMain() {
