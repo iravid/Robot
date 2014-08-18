@@ -257,13 +257,13 @@ static void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int a
             light.ambientCoefficient -= 1.0f;
     }
     
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+    if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
         camera.offsetOrientation(-5.0f, 0.0f);
-    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+    if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
         camera.offsetOrientation(5.0f, 0.0f);
-    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+    if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT))
         camera.offsetOrientation(0.0f, 5.0f);
-    if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+    if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT))
         camera.offsetOrientation(0.0f, -5.0f);
     
 }
