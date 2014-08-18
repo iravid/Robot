@@ -71,6 +71,8 @@ struct Light {
     float attentuation;
     // Ambience coefficient
     float ambientCoefficient;
+    
+    Light() : position(0, 0, 0), intensities(1.0f, 1.0f, 1.0f), attentuation(0.02f), ambientCoefficient(0.005f) {}
 };
 
 const glm::vec2 SCREEN_SIZE(1680, 1050);
