@@ -268,6 +268,10 @@ static void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int a
     
 }
 
+void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height) {
+    camera.setViewportAspectRatio((float) width / (float) height);
+}
+
 void updatePositions() {
     
 }
@@ -330,7 +334,7 @@ void AppMain() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     
     // Create the window
     window = glfwCreateWindow(SCREEN_SIZE.x, SCREEN_SIZE.y, "Robot", nullptr, nullptr);
@@ -338,7 +342,8 @@ void AppMain() {
         glfwTerminate();
         throw std::runtime_error("Error creating GLFW window");
     }
-        
+    
+    glfwSetFramebufferSizeCallback(window, glfwFramebufferResizeCallbackFunc);
     glfwMakeContextCurrent(window);
     
     // Initialize GLEW
