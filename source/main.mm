@@ -62,26 +62,36 @@ static Model *loadFloorModel() {
     glGenBuffers(1, &floor->vbo);
     glGenVertexArrays(1, &floor->vao);
     
+    // Generate a buffer for the element array
+    glGenBuffers(1, &floor->ebo);
+    
     // Bind the vertex array
     glBindVertexArray(floor->vao);
     
-    // Bind the buffer
+    // Bind the vertex data buffer
     glBindBuffer(GL_ARRAY_BUFFER, floor->vbo);
     
     GLfloat floorVertexData[] = {
     //    X     Y     Z     U     V    Normal
-    //  first triangle
         -1.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         1.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         1.5f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-    //  second triangle
-        1.5f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
         -1.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -1.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
     };
     
     // Copy vertex data to OpenGL buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertexData), floorVertexData, GL_STATIC_DRAW);
+    
+    // Bind the element buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floor->ebo);
+    
+    GLuint floorElementData[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+    
+    // Copy element data to OpenGL buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floorElementData), floorElementData, GL_STATIC_DRAW);
     
     // Point the vert in-parameter of the vertex shader to the first 3 elements of every 5 elements in the array
     glEnableVertexAttribArray(floor->shaders->attrib("vert"));
@@ -113,24 +123,31 @@ static Model *loadWallModel() {
     glGenBuffers(1, &wall->vbo);
     glGenVertexArrays(1, &wall->vao);
     
+    glGenBuffers(1, &wall->ebo);
+    
     glBindVertexArray(wall->vao);
     
     glBindBuffer(GL_ARRAY_BUFFER, wall->vbo);
     
     // Wall quad: (-1.5, -1), (-1.5, 1), (1.5, 1), (1.5, -1)
     GLfloat wallVertexData[] = {
-        // First triangle
     //    X      Y     Z     U     V     Xn    Yn    Zn
         -1.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         -1.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         1.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        // Second triangle
-        1.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         1.5f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-        -1.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
     };
     
     glBufferData(GL_ARRAY_BUFFER, sizeof(wallVertexData), wallVertexData, GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wall->ebo);
+    
+    GLuint wallElementData[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+    
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(wallElementData), wallElementData, GL_STATIC_DRAW);
     
     glEnableVertexAttribArray(wall->shaders->attrib("vert"));
     glVertexAttribPointer(wall->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
@@ -254,7 +271,7 @@ void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransfo
     
     // Bind VAO and draw
     glBindVertexArray(model->vao);
-    glDrawArrays(model->drawType, model->drawStart, model->drawCount);
+    glDrawElements(model->drawType, model->drawCount, GL_UNSIGNED_INT, 0);
     
     // Unbind everything
     glBindVertexArray(0);

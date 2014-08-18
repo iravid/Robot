@@ -20,6 +20,7 @@ struct Model {
     
     GLuint vbo;
     GLuint vao;
+    GLuint ebo;
     
     // Vertex parameters
     GLenum drawType;
@@ -32,7 +33,7 @@ struct Model {
     
     // Constructor
     Model() : shaders(nullptr), texture(nullptr),
-            vbo(0), vao(0),
+            vbo(0), vao(0), ebo(0),
             drawType(GL_TRIANGLES), drawStart(0), drawCount(0),
             shininess(0.0f), specularColor(1.0f, 1.0f, 1.0f) {}
 };
