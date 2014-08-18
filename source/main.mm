@@ -19,61 +19,8 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Camera.h"
-
-struct Model {
-    ShaderProgram *shaders;
-    Texture *texture;
-    
-    GLuint vbo;
-    GLuint vao;
-    
-    // Vertex parameters
-    GLenum drawType;
-    GLint drawStart;
-    GLint drawCount;
-    
-    // Lighting parameters
-    GLfloat shininess;
-    glm::vec3 specularColor;
-    
-    // Constructor
-    Model() :
-        shaders(nullptr), texture(nullptr),
-        vbo(0), vao(0),
-        drawType(GL_TRIANGLES), drawStart(0), drawCount(0),
-        shininess(0.0f), specularColor(1.0f, 1.0f, 1.0f) {}
-};
-
-struct ModelTransform {
-    glm::mat4 scale;
-    glm::mat4 rotate;
-    glm::mat4 translate;
-    
-    ModelTransform() : scale(), rotate(), translate() {}
-    glm::mat4 matrix() const { return translate * rotate * scale; }
-};
-
-struct ModelInstance {
-    // The model itself
-    Model *model;
-    // The transformation to be applied to this instance
-    ModelTransform transform;
-    
-    ModelInstance() : model(nullptr), transform() {}
-};
-
-struct Light {
-    // Light position
-    glm::vec3 position;
-    // Light color
-    glm::vec3 intensities;
-    // Attentuation coefficient
-    float attentuation;
-    // Ambience coefficient
-    float ambientCoefficient;
-    
-    Light() : position(0, 0, 0), intensities(1.0f, 1.0f, 1.0f), attentuation(0.02f), ambientCoefficient(0.005f) {}
-};
+#include "Light.h"
+#include "Model.h"
 
 const glm::vec2 SCREEN_SIZE(1680, 1050);
 Light light;
