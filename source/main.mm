@@ -97,24 +97,25 @@ static Texture *textureFromFile(const char *textureFilename) {
     return new Texture(bmp);
 }
 
-static void loadFloorModel(Model& floor) {
-    floor.shaders = programWithShaders("vertex-shader.vsh", "fragment-shader.fsh");
-    floor.drawType = GL_TRIANGLES;
-    floor.drawStart = 0;
-    floor.drawCount = 6;
-    floor.shininess = 80.0f;
-    floor.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    floor.texture = textureFromFile("concrete_texture.jpg");
+static Model *loadFloorModel() {
+    Model *floor = new Model();
+    floor->shaders = programWithShaders("vertex-shader.vsh", "fragment-shader.fsh");
+    floor->drawType = GL_TRIANGLES;
+    floor->drawStart = 0;
+    floor->drawCount = 6;
+    floor->shininess = 80.0f;
+    floor->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    floor->texture = textureFromFile("concrete_texture.jpg");
     
     // Generate buffers and vertex arrays
-    glGenBuffers(1, &floor.vbo);
-    glGenVertexArrays(1, &floor.vao);
+    glGenBuffers(1, &floor->vbo);
+    glGenVertexArrays(1, &floor->vao);
     
     // Bind the vertex array
-    glBindVertexArray(floor.vao);
+    glBindVertexArray(floor->vao);
     
     // Bind the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, floor.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, floor->vbo);
     
     GLfloat floorVertexData[] = {
     //    X     Y     Z     U     V    Normal
@@ -132,35 +133,38 @@ static void loadFloorModel(Model& floor) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertexData), floorVertexData, GL_STATIC_DRAW);
     
     // Point the vert in-parameter of the vertex shader to the first 3 elements of every 5 elements in the array
-    glEnableVertexAttribArray(floor.shaders->attrib("vert"));
-    glVertexAttribPointer(floor.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(floor->shaders->attrib("vert"));
+    glVertexAttribPointer(floor->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
     
     // Same thing, but point vertTextureCoord to last 2 elements of every 5 elements
-    glEnableVertexAttribArray(floor.shaders->attrib("vertTextureCoord"));
-    glVertexAttribPointer(floor.shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(floor->shaders->attrib("vertTextureCoord"));
+    glVertexAttribPointer(floor->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
     
-    glEnableVertexAttribArray(floor.shaders->attrib("vertNormal"));
-    glVertexAttribPointer(floor.shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(floor->shaders->attrib("vertNormal"));
+    glVertexAttribPointer(floor->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
     
     // Unbind the VAO
     glBindVertexArray(0);
+    
+    return floor;
 }
 
-static void loadWallModel(Model& wall) {
-    wall.shaders = programWithShaders("vertex-shader.vsh", "fragment-shader.fsh");
-    wall.drawType = GL_TRIANGLES;
-    wall.drawStart = 0;
-    wall.drawCount = 6;
-    wall.shininess = 100.0f;
-    wall.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    wall.texture = textureFromFile("brick_texture.jpg");
+static Model *loadWallModel() {
+    Model *wall = new Model();
+    wall->shaders = programWithShaders("vertex-shader.vsh", "fragment-shader.fsh");
+    wall->drawType = GL_TRIANGLES;
+    wall->drawStart = 0;
+    wall->drawCount = 6;
+    wall->shininess = 100.0f;
+    wall->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    wall->texture = textureFromFile("brick_texture.jpg");
     
-    glGenBuffers(1, &wall.vbo);
-    glGenVertexArrays(1, &wall.vao);
+    glGenBuffers(1, &wall->vbo);
+    glGenVertexArrays(1, &wall->vao);
     
-    glBindVertexArray(wall.vao);
+    glBindVertexArray(wall->vao);
     
-    glBindBuffer(GL_ARRAY_BUFFER, wall.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, wall->vbo);
     
     // Wall quad: (-1.5, -1), (-1.5, 1), (1.5, 1), (1.5, -1)
     GLfloat wallVertexData[] = {
@@ -177,58 +181,53 @@ static void loadWallModel(Model& wall) {
     
     glBufferData(GL_ARRAY_BUFFER, sizeof(wallVertexData), wallVertexData, GL_STATIC_DRAW);
     
-    glEnableVertexAttribArray(wall.shaders->attrib("vert"));
-    glVertexAttribPointer(wall.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(wall->shaders->attrib("vert"));
+    glVertexAttribPointer(wall->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
     
-    glEnableVertexAttribArray(wall.shaders->attrib("vertTextureCoord"));
-    glVertexAttribPointer(wall.shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(wall->shaders->attrib("vertTextureCoord"));
+    glVertexAttribPointer(wall->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
     
-    glEnableVertexAttribArray(wall.shaders->attrib("vertNormal"));
-    glVertexAttribPointer(wall.shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(wall->shaders->attrib("vertNormal"));
+    glVertexAttribPointer(wall->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
     
     glBindVertexArray(0);
+    
+    return wall;
 }
 
 static void createInstances(std::list<ModelInstance>& instanceList) {
-    Model floorModel;
-    loadFloorModel(floorModel);
+    Model *floorModel = loadFloorModel();
     
     ModelInstance floorInstance;
-    floorInstance.model = new Model();
-    memcpy(floorInstance.model, &floorModel, sizeof(Model));
+    floorInstance.model = floorModel;
     floorInstance.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
     instanceList.push_back(floorInstance);
     
     ModelInstance ceilingInstance;
-    ceilingInstance.model = new Model();
-    memcpy(ceilingInstance.model, &floorModel, sizeof(Model));
+    ceilingInstance.model = floorModel;
     // Transform order: TRS
     ceilingInstance.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
     ceilingInstance.transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
     ceilingInstance.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 8, 0));
     instanceList.push_back(ceilingInstance);
     
-    Model wallModel;
-    loadWallModel(wallModel);
+    Model *wallModel = loadWallModel();
     
     ModelInstance backWall;
-    backWall.model = new Model();
-    memcpy(backWall.model, &wallModel, sizeof(Model));
+    backWall.model = wallModel;
     backWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
     backWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, -4));
     instanceList.push_back(backWall);
     
     ModelInstance frontWall;
-    frontWall.model = new Model();
-    memcpy(frontWall.model, &wallModel, sizeof(Model));
+    frontWall.model = wallModel;
     frontWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
     frontWall.transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(0, 1.0f, 0));
     frontWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, 4));
     instanceList.push_back(frontWall);
     
     ModelInstance leftWall;
-    leftWall.model = new Model();
-    memcpy(leftWall.model, &wallModel, sizeof(Model));
+    leftWall.model = wallModel;
     // Rotation by negative amount of degrees is needed in order to preserve the direction of the surface normal
     leftWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
     leftWall.transform.rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(0, 1.0f, 0));
@@ -236,8 +235,7 @@ static void createInstances(std::list<ModelInstance>& instanceList) {
     instanceList.push_back(leftWall);
     
     ModelInstance rightWall;
-    rightWall.model = new Model();
-    memcpy(rightWall.model, &wallModel, sizeof(Model));
+    rightWall.model = wallModel;
     rightWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
     rightWall.transform.rotate = glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
     rightWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(6, 4, 0));
