@@ -60,8 +60,8 @@ static Model *loadFloorModel() {
     
     // Generate buffers and vertex arrays
     glGenBuffers(1, &floor->vbo);
+    glGenBuffers(1, &floor->nbo);
     glGenVertexArrays(1, &floor->vao);
-    
     // Generate a buffer for the element array
     glGenBuffers(1, &floor->ebo);
     
@@ -70,39 +70,47 @@ static Model *loadFloorModel() {
     
     // Bind the vertex data buffer
     glBindBuffer(GL_ARRAY_BUFFER, floor->vbo);
-    
     GLfloat floorVertexData[] = {
-    //    X     Y     Z     U     V    Normal
-        -1.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        1.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        1.5f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -1.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    //    X     Y     Z     U     V
+        -1.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+        1.5f, 0.0f, 1.0f, 1.0f, 1.0f,
+        1.5f, 0.0f, -1.0f, 1.0f, 0.0f,
+        -1.5f, 0.0f, -1.0f, 0.0f, 0.0f,
     };
-    
     // Copy vertex data to OpenGL buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertexData), floorVertexData, GL_STATIC_DRAW);
     
+    // Point the vert in-parameter of the vertex shader to the first 3 elements of every 5 elements in the array
+    glEnableVertexAttribArray(floor->shaders->attrib("vert"));
+    glVertexAttribPointer(floor->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
+    
+    // Same thing, but point vertTextureCoord to last 2 elements of every 5 elements
+    glEnableVertexAttribArray(floor->shaders->attrib("vertTextureCoord"));
+    glVertexAttribPointer(floor->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
+    
+    // Bind the normal data buffer
+    glBindBuffer(GL_ARRAY_BUFFER, floor->nbo);
+    GLfloat floorNormalData[] = {
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f
+    };
+    // Copy the normal data to OpenGL buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floorNormalData), floorNormalData, GL_STATIC_DRAW);
+    
+    // Point vertNormal to this buffer
+    glEnableVertexAttribArray(floor->shaders->attrib("vertNormal"));
+    glVertexAttribPointer(floor->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    
     // Bind the element buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floor->ebo);
-    
     GLuint floorElementData[] = {
         0, 1, 2,
         2, 3, 0
     };
-    
     // Copy element data to OpenGL buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floorElementData), floorElementData, GL_STATIC_DRAW);
-    
-    // Point the vert in-parameter of the vertex shader to the first 3 elements of every 5 elements in the array
-    glEnableVertexAttribArray(floor->shaders->attrib("vert"));
-    glVertexAttribPointer(floor->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-    
-    // Same thing, but point vertTextureCoord to last 2 elements of every 5 elements
-    glEnableVertexAttribArray(floor->shaders->attrib("vertTextureCoord"));
-    glVertexAttribPointer(floor->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
-    
-    glEnableVertexAttribArray(floor->shaders->attrib("vertNormal"));
-    glVertexAttribPointer(floor->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
     
     // Unbind the VAO
     glBindVertexArray(0);
@@ -121,42 +129,46 @@ static Model *loadWallModel() {
     wall->texture = textureFromFile("brick_texture.jpg");
     
     glGenBuffers(1, &wall->vbo);
+    glGenBuffers(1, &wall->nbo);
     glGenVertexArrays(1, &wall->vao);
-    
     glGenBuffers(1, &wall->ebo);
     
     glBindVertexArray(wall->vao);
     
     glBindBuffer(GL_ARRAY_BUFFER, wall->vbo);
-    
-    // Wall quad: (-1.5, -1), (-1.5, 1), (1.5, 1), (1.5, -1)
     GLfloat wallVertexData[] = {
-    //    X      Y     Z     U     V     Xn    Yn    Zn
-        -1.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-        -1.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.5f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+    //    X      Y     Z     U     V
+        -1.5f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -1.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.5f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.5f, -1.0f, 0.0f, 1.0f, 0.0f,
     };
-    
     glBufferData(GL_ARRAY_BUFFER, sizeof(wallVertexData), wallVertexData, GL_STATIC_DRAW);
     
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wall->ebo);
+    glEnableVertexAttribArray(wall->shaders->attrib("vert"));
+    glVertexAttribPointer(wall->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
     
+    glEnableVertexAttribArray(wall->shaders->attrib("vertTextureCoord"));
+    glVertexAttribPointer(wall->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
+    
+    glBindBuffer(GL_ARRAY_BUFFER, wall->nbo);
+    GLfloat wallNormalData[] = {
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(wallNormalData), wallNormalData, GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(wall->shaders->attrib("vertNormal"));
+    glVertexAttribPointer(wall->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wall->ebo);
     GLuint wallElementData[] = {
         0, 1, 2,
         2, 3, 0
     };
-    
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(wallElementData), wallElementData, GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(wall->shaders->attrib("vert"));
-    glVertexAttribPointer(wall->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-    
-    glEnableVertexAttribArray(wall->shaders->attrib("vertTextureCoord"));
-    glVertexAttribPointer(wall->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
-    
-    glEnableVertexAttribArray(wall->shaders->attrib("vertNormal"));
-    glVertexAttribPointer(wall->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *) (5 * sizeof(GLfloat)));
     
     glBindVertexArray(0);
     
