@@ -124,7 +124,7 @@ static Model *loadWallModel() {
     wall->drawType = GL_TRIANGLES;
     wall->drawStart = 0;
     wall->drawCount = 6;
-    wall->shininess = 100.0f;
+    wall->shininess = 80.0f;
     wall->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     wall->texture = textureFromFile("brick_texture.jpg");
     
@@ -175,6 +175,135 @@ static Model *loadWallModel() {
     return wall;
 }
 
+static Model *loadTorsoModel() {
+    Model *torso = new Model();
+    
+    torso->shaders = programWithShaders("vertex-shader.vsh", "fragment-shader.fsh");
+    torso->drawType = GL_TRIANGLES;
+    torso->drawCount = 6 * 2 * 3; // 6 surfaces * 2 triangles each * 3 vertices each
+    torso->drawStart = 0;
+    torso->shininess = 120.0f;
+    torso->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    torso->texture = textureFromFile("metal_texture.jpg");
+    
+    // Create buffers
+    glGenBuffers(1, &torso->vbo);
+    glGenBuffers(1, &torso->nbo);
+    glGenVertexArrays(1, &torso->vao);
+    glGenBuffers(1, &torso->ebo);
+    
+    // Bind array
+    glBindVertexArray(torso->vao);
+    
+    // Load the vertex data. The vertices are specified according to the surfaces they describe (front/back/etc.)
+    glBindBuffer(GL_ARRAY_BUFFER, torso->vbo);
+    GLfloat torsoVertexData[] = {
+        // Front
+        0.5f, 0.75f, 0.25f, 1.0f, 1.0f,
+        0.5f, -0.75f, 0.25f, 1.0f, 0.0f,
+        -0.5f, -0.75f, 0.25f, 0.0f, 0.0f,
+        -0.5f, 0.75f, 0.25f, 0.0f, 1.0f,
+        // Back
+        0.5f, 0.75f, -0.25f, 1.0f, 1.0f,
+        0.5f, -0.75f, -0.25f, 1.0f, 0.0f,
+        -0.5f, -0.75f, -0.25f, 0.0f, 0.0f,
+        -0.5f, 0.75f, -0.25f, 0.0f, 1.0f,
+        // Left
+        -0.5f, 0.75f, 0.25f, 1.0f, 1.0f,
+        -0.5f, 0.75f, -0.25f, 1.0f, 0.0f,
+        -0.5f, -0.75f, -0.25f, 0.0f, 0.0f,
+        -0.5f, -0.75f, 0.25f, 0.0f, 1.0f,
+        // Right
+        0.5f, 0.75f, 0.25f, 1.0f, 1.0f,
+        0.5f, 0.75f, -0.25f, 1.0f, 0.0f,
+        0.5f, -0.75f, -0.25f, 0.0f, 0.0f,
+        0.5f, -0.75f, 0.25f, 0.0f, 1.0f,
+        // Top
+        -0.5f, 0.75f, 0.25f, 1.0f, 1.0f,
+        -0.5f, 0.75f, -0.25f, 1.0f, 0.0f,
+        0.5f, 0.75f, -0.25f, 0.0f, 0.0f,
+        0.5f, 0.75f, 0.25f, 0.0f, 1.0f,
+        // Bottom
+        -0.5f, -0.75f, 0.25f, 1.0f, 1.0f,
+        0.5f, -0.75f, 0.25f, 1.0f, 0.0f,
+        0.5f, -0.75f, -0.25f, 0.0f, 0.0f,
+        -0.5f, -0.75f, -0.25f, 0.0f, 1.0f
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(torsoVertexData), torsoVertexData, GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(torso->shaders->attrib("vert"));
+    glVertexAttribPointer(torso->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
+    
+    glEnableVertexAttribArray(torso->shaders->attrib("vertTextureCoord"));
+    glVertexAttribPointer(torso->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid *) (3 * sizeof(GLfloat)));
+    
+    // Load the normal data
+    glBindBuffer(GL_ARRAY_BUFFER, torso->nbo);
+    GLfloat torsoNormalData[] = {
+        // Front
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        // Back
+        0.0f, 0.0f, -1.0f,
+        0.0f, 0.0f, -1.0f,
+        0.0f, 0.0f, -1.0f,
+        0.0f, 0.0f, -1.0f,
+        // Left
+        -1.0f, 0.0f, 0.0f,
+        -1.0f, 0.0f, 0.0f,
+        -1.0f, 0.0f, 0.0f,
+        -1.0f, 0.0f, 0.0f,
+        // Right
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        // Top
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        // Bottom
+        0.0f, -1.0f, 0.0f,
+        0.0f, -1.0f, 0.0f,
+        0.0f, -1.0f, 0.0f,
+        0.0f, -1.0f, 0.0f
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(torsoNormalData), torsoNormalData, GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(torso->shaders->attrib("vertNormal"));
+    glVertexAttribPointer(torso->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, torso->ebo);
+    GLuint torsoElementData[] {
+        // Front
+        0, 1, 2,
+        2, 3, 0,
+        // Back
+        4, 5, 6,
+        6, 7, 4,
+        // Left
+        8, 9, 10,
+        10, 11, 8,
+        // Right
+        12, 13, 14,
+        14, 15, 12,
+        // Top
+        16, 17, 18,
+        18, 19, 16,
+        // Bottom
+        20, 21, 22,
+        22, 23, 20
+    };
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(torsoElementData), torsoElementData, GL_STATIC_DRAW);
+    
+    glBindVertexArray(0);
+    
+    return torso;
+}
+
 static void createInstances(std::list<ModelInstance>& instanceList) {
     Model *floorModel = loadFloorModel();
     
@@ -220,36 +349,12 @@ static void createInstances(std::list<ModelInstance>& instanceList) {
     rightWall.transform.rotate = glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
     rightWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(6, 4, 0));
     instanceList.push_back(rightWall);
-}
-
-static void glfwErrorCallbackFunc(int error, const char *desc) {
-    std::cerr << "GLFW error description:" << std::endl << desc << std::endl;
-}
-
-static void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
     
-    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-        if (light.ambientCoefficient < 1.0f)
-            light.ambientCoefficient += 1.0f;
-        else
-            light.ambientCoefficient -= 1.0f;
-    }
-    
-    if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(-5.0f, 0.0f);
-    if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(5.0f, 0.0f);
-    if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(0.0f, 5.0f);
-    if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(0.0f, -5.0f);
-    
-}
-
-void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height) {
-    camera.setViewportAspectRatio((float) width / (float) height);
+    Model *torsoModel = loadTorsoModel();
+    ModelInstance torso;
+    torso.model = torsoModel;
+    torso.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 3, 0));
+    instanceList.push_back(torso);
 }
 
 void updatePositions() {
@@ -257,7 +362,7 @@ void updatePositions() {
 }
 
 // Render a single instance
-void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransform, const glm::mat4 normalRotationMatrix) {
+void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransform, const glm::mat4& normalRotationMatrix) {
     Model *model = instance.model;
     ShaderProgram *shaders = model->shaders;
     
@@ -319,6 +424,45 @@ void renderFrame(const std::list<ModelInstance>& instances) {
         renderInstance(*it, it->transform.matrix(), it->transform.rotate);
 }
 
+static void glfwErrorCallbackFunc(int error, const char *desc) {
+    std::cerr << "GLFW error description:" << std::endl << desc << std::endl;
+}
+
+static void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+        if (light.ambientCoefficient < 1.0f)
+            light.ambientCoefficient += 1.0f;
+        else
+            light.ambientCoefficient -= 1.0f;
+    }
+    
+    if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetOrientation(-5.0f, 0.0f);
+    if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetOrientation(5.0f, 0.0f);
+    if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetOrientation(0.0f, 5.0f);
+    if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetOrientation(0.0f, -5.0f);
+    
+    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetPosition(camera.forward());
+    if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetPosition(-camera.forward());
+    if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetPosition(-camera.right());
+    if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
+        camera.offsetPosition(camera.right());
+    
+}
+
+void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height) {
+    camera.setViewportAspectRatio((float) width / (float) height);
+}
+
 void AppMain() {
     GLFWwindow *window;
     
@@ -376,14 +520,14 @@ void AppMain() {
     createInstances(instances);
     
     // Orient camera
-    camera.setPosition(glm::vec3(0, 2, 0));
+    camera.setPosition(glm::vec3(-5, 3, 3));
     camera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     camera.setNearAndFarPlanes(0.2f, 100.0f);
-    camera.setFieldOfView(120.0f);
-    camera.lookAt(glm::vec3(0, 2, -4));
+    camera.setFieldOfView(65.0f);
+    camera.lookAt(glm::vec3(0, 2, 0));
     
     // Setup light source parameters
-    light.position = glm::vec3(0, 4, 0);
+    light.position = glm::vec3(5, 3, 3);
     light.intensities = glm::vec3(1.0f, 1.0f, 1.0f); // white
     light.attentuation = 0.002f;
     light.ambientCoefficient = 0.005f;
