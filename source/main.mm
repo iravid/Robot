@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #include <iostream>
 #include <list>
+#include <string>
+#include <map>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -23,40 +25,25 @@
 #include "Model.h"
 #include "MatrixStack.h"
 #include "RenderNode.h"
+#include "Loaders.h"
 
 const glm::vec2 SCREEN_SIZE(1680, 1050);
 Light light;
 Camera camera;
 
-// returns the full path to the file `fileName` in the resources directory of the app bundle
-static std::string ResourcePath(std::string fileName) {
-    NSString* fname = [NSString stringWithCString:fileName.c_str() encoding:NSUTF8StringEncoding];
-    NSString* path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:fname];
-    return std::string([path cStringUsingEncoding:NSUTF8StringEncoding]);
-}
+static Model *loadModel(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
+                        GLenum drawType, GLuint drawCount, GLuint drawStart,
+                        GLfloat shininess, glm::vec3 specularColor,
+                        const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath);
 
-static ShaderProgram *programWithShaders(const char *vertexShaderFilename, const char *fragmentShaderFilename) {
-    std::vector<Shader> shaders;
-    shaders.push_back(Shader::shaderFromFile(ResourcePath(vertexShaderFilename), GL_VERTEX_SHADER));
-    shaders.push_back(Shader::shaderFromFile(ResourcePath(fragmentShaderFilename), GL_FRAGMENT_SHADER));
-    return new ShaderProgram(shaders);
-}
-
-static Texture *textureFromFile(const char *textureFilename) {
-    Bitmap bmp = Bitmap::bitmapFromFile(ResourcePath(textureFilename));
-    bmp.flipVertically();
-    return new Texture(bmp);
-}
-
-static Model *loadModel(std::vector<GLfloat>& vertexData, std::vector<GLfloat>& textureData, std::vector<GLfloat>& normalData, std::vector<GLuint>& elementData,
+static Model *loadModel(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
                         GLenum drawType, GLuint drawCount, GLuint drawStart,
                         GLfloat shininess, glm::vec3 specularColor,
                         const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath) {
     Model *model = new Model();
-    
     model->shaders = programWithShaders(vertexShaderPath, fragmentShaderPath);
     model->drawType = drawType;
-    model->drawCount = drawCount; // 6 surfaces * 2 triangles each * 3 vertices each
+    model->drawCount = drawCount;
     model->drawStart = drawStart;
     model->shininess = shininess;
     model->specularColor = specularColor;
@@ -74,20 +61,20 @@ static Model *loadModel(std::vector<GLfloat>& vertexData, std::vector<GLfloat>& 
     
     // Load the vertex data.
     glBindBuffer(GL_ARRAY_BUFFER, model->vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), &vertexData[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(glm::vec3), &vertexData[0], GL_STATIC_DRAW);
     
     glEnableVertexAttribArray(model->shaders->attrib("vert"));
     glVertexAttribPointer(model->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
     
     glBindBuffer(GL_ARRAY_BUFFER, model->tbo);
-    glBufferData(GL_ARRAY_BUFFER, textureData.size() * sizeof(GLfloat), &textureData[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, textureData.size() * sizeof(glm::vec2), &textureData[0], GL_STATIC_DRAW);
     
     glEnableVertexAttribArray(model->shaders->attrib("vertTextureCoord"));
     glVertexAttribPointer(model->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
     
     // Load the normal data
     glBindBuffer(GL_ARRAY_BUFFER, model->nbo);
-    glBufferData(GL_ARRAY_BUFFER, normalData.size() * sizeof(GLfloat), &normalData[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, normalData.size() * sizeof(glm::vec3), &normalData[0], GL_STATIC_DRAW);
     
     glEnableVertexAttribArray(model->shaders->attrib("vertNormal"));
     glVertexAttribPointer(model->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
@@ -247,46 +234,42 @@ static Model *loadWallModel() {
     return wall;
 }
 
-static Model *loadTorsoModel() {
+/*static Model *loadMetalBoxModel() {
     // Load the vertex data. The vertices are specified according to the surfaces they describe (front/back/etc.)
-    float x = 1.0f; // Scaling factor
     GLfloat _torsoVertexData[] = {
         // Front
-        2.0f, 3.0f, 1.0f,
-        2.0f, -3.0f, 1.0f,
-        -2.0f, -3.0f, 1.0f,
-        -2.0f, 3.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
         // Back
-        2.0f, 3.0f, -1.0f,
-        2.0f, -3.0f, -1.0f,
-        -2.0f, -3.0f, -1.0f,
-        -2.0f, 3.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
         // Left
-        -2.0f, 3.0f, 1.0f,
-        -2.0f, 3.0f, -1.0f,
-        -2.0f, -3.0f, -1.0f,
-        -2.0f, -3.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, 1.0f,
         // Right
-        2.0f, 3.0f, 1.0f,
-        2.0f, 3.0f, -1.0f,
-        2.0f, -3.0f, -1.0f,
-        2.0f, -3.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, 1.0f,
         // Top
-        -2.0f, 3.0f, 1.0f,
-        -2.0f, 3.0f, -1.0f,
-        2.0f, 3.0f, -1.0f,
-        2.0f, 3.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, 1.0f,
         // Bottom
-        -2.0f, -3.0f, 1.0f,
-        2.0f, -3.0f, 1.0f,
-        2.0f, -3.0f, -1.0f,
-        -2.0f, -3.0f, -1.0f
+        -1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f
     };
     
     std::vector<GLfloat> torsoVertexData(_torsoVertexData, _torsoVertexData + sizeof(_torsoVertexData) / sizeof(_torsoVertexData[0]));
-    
-    for (int i = 0; i <= 3 * 4 * 6; ++i)
-        torsoVertexData[i] *= x;
 
     GLfloat _torsoTextureData[] = {
         // Front
@@ -384,199 +367,105 @@ static Model *loadTorsoModel() {
                              "metal_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
     return torso;
+} */
+
+static std::map<std::string, Model *> loadRobotModels() {
+    // Load the arrays from the file
+    std::map<std::string, ModelData> robotData = loadModelsFromObj("RobotModel.obj");
+    std::map<std::string, Model *> robotModels;
+    
+    for (std::map<std::string, ModelData>::const_iterator it = robotData.begin(); it != robotData.end(); ++it) {
+        Model *model = loadModel(it->second.vertexData, it->second.textureData, it->second.normalData, it->second.indexData,
+                                 GL_TRIANGLES, 36, 0,
+                                 120.0f, glm::vec3(1.0f),
+                                 "metal_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+        robotModels[it->first] = model;
+    }
+    
+    return robotModels;
 }
 
-static Model *loadNeckModel() {
-    float x = 0.25f;
-    
-    GLfloat _neckVertexData[] = {
-        // Front
-        -0.5f, -0.25, 0.25f,
-        -0.5f, 0.25, 0.25f,
-        0.5f, 0.25, 0.25f,
-        0.5f, -0.25, 0.25f,
-        // Back
-        -0.5f, -0.25, -0.25f,
-        -0.5f, 0.25, -0.25f,
-        0.5f, 0.25, -0.25f,
-        0.5f, -0.25, -0.25f,
-        // Left
-        -0.5f, -0.25, 0.25f,
-        -0.5f, 0.25, 0.25f,
-        -0.5f, 0.25, -0.25f,
-        -0.5f, -0.25, -0.25f,
-        // Right
-        0.5f, 0.25, 0.25f,
-        0.5f, -0.25, 0.25f,
-        0.5f, -0.25, -0.25f,
-        0.5f, 0.25, -0.25f,
-        // Top
-        -0.5f, 0.25, 0.25f,
-        0.5f, 0.25, 0.25f,
-        0.5f, 0.25, -0.25f,
-        -0.5f, 0.25, -0.25f,
-        // Bottom
-        -0.5f, -0.25, 0.25f,
-        0.5f, -0.25, 0.25f,
-        0.5f, -0.25, -0.25f,
-        -0.5f, -0.25, -0.25f
-    };
-    
-    std::vector<GLfloat> neckVertexData(_neckVertexData, _neckVertexData + sizeof(_neckVertexData) / sizeof(_neckVertexData[0]));
-    
-    // Multiply by the scaling factor
-    for (int i = 0; i < neckVertexData.size(); ++i)
-        neckVertexData[i] *= x;
-    
-    GLfloat _neckTextureData[] = {
-        // Front
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-        // Back
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-        // Left
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-        // Right
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-        // Top
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-        // Bottom
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-    };
-    std::vector<GLfloat> neckTextureData(_neckTextureData, _neckTextureData + sizeof(_neckTextureData) / sizeof(_neckTextureData[0]));
-    
-    GLfloat _neckNormalData[] = {
-        // Front
-        0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f,
-        // Back
-        0.0f, 0.0f, -1.0f,
-        0.0f, 0.0f, -1.0f,
-        0.0f, 0.0f, -1.0f,
-        0.0f, 0.0f, -1.0f,
-        // Left
-        -1.0f, 0.0f, 0.0f,
-        -1.0f, 0.0f, 0.0f,
-        -1.0f, 0.0f, 0.0f,
-        -1.0f, 0.0f, 0.0f,
-        // Right
-        1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-        // Top
-        0.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        // Bottom
-        0.0f, -1.0f, 0.0f,
-        0.0f, -1.0f, 0.0f,
-        0.0f, -1.0f, 0.0f,
-        0.0f, -1.0f, 0.0f
-    };
-    std::vector<GLfloat> neckNormalData(_neckNormalData, _neckNormalData + sizeof(_neckNormalData) / sizeof(_neckNormalData[0]));
-    
-    GLuint _neckElementData[] = {
-        // Front
-        0, 1, 2,
-        2, 3, 0,
-        // Back
-        4, 5, 6,
-        6, 7, 4,
-        // Left
-        8, 9, 10,
-        10, 11, 8,
-        // Right
-        12, 13, 14,
-        14, 15, 12,
-        // Top
-        16, 17, 18,
-        18, 19, 16,
-        // Bottom
-        20, 21, 22,
-        22, 23, 20
-    };
-    std::vector<GLuint> neckElementData(_neckElementData, _neckElementData + sizeof(_neckElementData) / sizeof(_neckElementData[0]));
-    
-    Model *neck = loadModel(neckVertexData, neckTextureData, neckNormalData, neckElementData,
-                     GL_TRIANGLES, 6 * 2 * 3, 0,
-                     120.0f, glm::vec3(1.0f, 1.0f, 1.0f),
-                     "metal_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
-    
-    return neck;
-}
-
-static void createInstances(std::list<ModelInstance>& instanceList) {
+static void createScene(std::list<RenderNode *>& renderNodes) {
+    /*
+     * Construct the room
+     */
     Model *floorModel = loadFloorModel();
     
-    ModelInstance floorInstance;
-    floorInstance.model = floorModel;
-    floorInstance.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
-    instanceList.push_back(floorInstance);
+    ModelInstance *floorInstance = new ModelInstance();
+    RenderNode *floorNode = new RenderNode();
+    floorInstance->model = floorModel;
+    floorInstance->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
+    floorNode->instance = floorInstance;
+    renderNodes.push_back(floorNode);
     
-    ModelInstance ceilingInstance;
-    ceilingInstance.model = floorModel;
-    // Transform order: TRS
-    ceilingInstance.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
-    ceilingInstance.transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    ceilingInstance.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 8, 0));
-    instanceList.push_back(ceilingInstance);
+    ModelInstance *ceilingInstance = new ModelInstance();
+    RenderNode *ceilingNode = new RenderNode();
+    ceilingInstance->model = floorModel;
+    ceilingInstance->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
+    ceilingInstance->transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    ceilingInstance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 8, 0));
+    ceilingNode->instance = ceilingInstance;
+    renderNodes.push_back(ceilingNode);
     
     Model *wallModel = loadWallModel();
     
-    ModelInstance backWall;
-    backWall.model = wallModel;
-    backWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
-    backWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, -4));
-    instanceList.push_back(backWall);
+    ModelInstance *backWall = new ModelInstance();
+    RenderNode *backWallNode = new RenderNode();
+    backWall->model = wallModel;
+    backWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
+    backWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, -4));
+    backWallNode->instance = backWall;
+    renderNodes.push_back(backWallNode);
     
-    ModelInstance frontWall;
-    frontWall.model = wallModel;
-    frontWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
-    frontWall.transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(0, 1.0f, 0));
-    frontWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, 4));
-    instanceList.push_back(frontWall);
+    ModelInstance *frontWall = new ModelInstance();
+    RenderNode *frontWallNode = new RenderNode();
+    frontWall->model = wallModel;
+    frontWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
+    frontWall->transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(0, 1.0f, 0));
+    frontWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, 4));
+    frontWallNode->instance = frontWall;
+    renderNodes.push_back(frontWallNode);
     
-    ModelInstance leftWall;
-    leftWall.model = wallModel;
-    // Rotation by negative amount of degrees is needed in order to preserve the direction of the surface normal
-    leftWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
-    leftWall.transform.rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(0, 1.0f, 0));
-    leftWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(-6, 4, 0));
-    instanceList.push_back(leftWall);
+    ModelInstance *leftWall = new ModelInstance();
+    RenderNode *leftWallNode = new RenderNode();
+    leftWall->model = wallModel;
+    leftWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
+    leftWall->transform.rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(0, 1.0f, 0));
+    leftWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(-6, 4, 0));
+    leftWallNode->instance = leftWall;
+    renderNodes.push_back(leftWallNode);
     
-    ModelInstance rightWall;
-    rightWall.model = wallModel;
-    rightWall.transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
-    rightWall.transform.rotate = glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
-    rightWall.transform.translate = glm::translate(glm::mat4(), glm::vec3(6, 4, 0));
-    instanceList.push_back(rightWall);
+    ModelInstance *rightWall = new ModelInstance();
+    RenderNode *rightWallNode = new RenderNode();
+    rightWall->model = wallModel;
+    rightWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
+    rightWall->transform.rotate = glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
+    rightWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(6, 4, 0));
+    rightWallNode->instance = rightWall;
+    renderNodes.push_back(rightWallNode);
     
-    Model *torsoModel = loadNeckModel();
-    ModelInstance torso;
-    torso.model = torsoModel;
-    torso.transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 3, 0));
-    instanceList.push_back(torso);
+    /*
+     * Construct the Robot from its various parts
+     */
+    std::map<std::string, Model *> robotModels = loadRobotModels();
+    RenderNode *headNode = new RenderNode(new ModelInstance(robotModels["Head"]));
+    RenderNode *torsoNode = new RenderNode(new ModelInstance(robotModels["Torso"]));
+    RenderNode *rightArmNode = new RenderNode(new ModelInstance(robotModels["R_Arm"]));
+    RenderNode *rightWristNode = new RenderNode(new ModelInstance(robotModels["R_Wrist"]));
+    RenderNode *leftArmNode = new RenderNode(new ModelInstance(robotModels["L_Arm"]));
+    RenderNode *leftWristNode = new RenderNode(new ModelInstance(robotModels["L_Wrist"]));
+    RenderNode *rightLegNode = new RenderNode(new ModelInstance(robotModels["R_Leg"]));
+    RenderNode *leftLegNode = new RenderNode(new ModelInstance(robotModels["L_Leg"]));
+    
+    rightArmNode->children.push_back(rightWristNode);
+    leftArmNode->children.push_back(leftWristNode);
+    torsoNode->children.push_back(leftLegNode);
+    torsoNode->children.push_back(rightLegNode);
+    torsoNode->children.push_back(leftArmNode);
+    torsoNode->children.push_back(rightArmNode);
+    torsoNode->children.push_back(headNode);
+    
+    renderNodes.push_back(torsoNode);
 }
 
 void updatePositions() {
@@ -618,32 +507,30 @@ void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransfo
     shaders->stopUsing();
 }
 
-void renderRecursive(const RenderNode& node, MatrixStack& modelTransformStack, MatrixStack& normalRotationStack) {
-    // Push the whole model matrix and the normal rotation separately onto the stack; we need to compute
-    // the overall rotation matrix in order to calculate the lighting properly for the model's surface
-    modelTransformStack.push(node.instance->transform.matrix());
-    normalRotationStack.push(node.instance->transform.rotate);
+void renderRecursive(const RenderNode *node, MatrixStack& modelTransformStack) {
+    modelTransformStack.push(node->instance->transform.matrix());
     
     // Render all children recursively
-    std::list<RenderNode>::const_iterator it;
-    for (it = node.children.begin(); it != node.children.end(); ++it)
-        renderRecursive(*it, modelTransformStack, normalRotationStack);
+    std::list<RenderNode *>::const_iterator it;
+    for (it = node->children.begin(); it != node->children.end(); ++it)
+        renderRecursive(*it, modelTransformStack);
     
     // Render this instance
-    renderInstance(*node.instance, modelTransformStack.multiplyMatrices());
+    renderInstance(*(node->instance), modelTransformStack.multiplyMatrices());
     
     // Pop the matrices
     modelTransformStack.pop();
-    normalRotationStack.pop();
 }
 
-void renderFrame(const std::list<ModelInstance>& instances) {
+void renderFrame(const std::list<RenderNode *>& scene) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    std::list<ModelInstance>::const_iterator it;
-    for (it = instances.begin(); it != instances.end(); ++it)
-        renderInstance(*it, it->transform.matrix());
+    MatrixStack matrixStack;
+    
+    std::list<RenderNode *>::const_iterator it;
+    for (it = scene.begin(); it != scene.end(); ++it)
+        renderRecursive(*it, matrixStack);
 }
 
 static void glfwErrorCallbackFunc(int error, const char *desc) {
@@ -738,15 +625,14 @@ void AppMain() {
         
     glfwSetKeyCallback(window, glfwKeyCallbackFunc);
     
-    std::list<ModelInstance> instances;
-    createInstances(instances);
+    std::list<RenderNode *> scene;
+    createScene(scene);
     
     // Orient camera
-    camera.setPosition(glm::vec3(5, 3, -2));
+    camera.setPosition(glm::vec3(0, 2, 0));
     camera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     camera.setNearAndFarPlanes(0.2f, 100.0f);
     camera.setFieldOfView(65.0f);
-    camera.lookAt(glm::vec3(0, 2, 0));
     
     // Setup light source parameters
     light.position = glm::vec3(-5, 3, 2);
@@ -756,7 +642,7 @@ void AppMain() {
     
     while (!glfwWindowShouldClose(window)) {
         updatePositions();
-        renderFrame(instances);
+        renderFrame(scene);
         glfwSwapBuffers(window);
         
         GLenum error = glGetError();

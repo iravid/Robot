@@ -8,6 +8,10 @@
 
 #include "MatrixStack.h"
 
+MatrixStack::MatrixStack() {
+    _stack.push_front(glm::mat4());
+}
+
 void MatrixStack::push(const glm::mat4& element) {
     _stack.push_front(element);
 }

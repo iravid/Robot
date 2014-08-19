@@ -14,6 +14,13 @@
 #include "ShaderProgram.h"
 #include "Texture.h"
 
+struct ModelData {
+    std::vector<glm::vec3> vertexData;
+    std::vector<glm::vec2> textureData;
+    std::vector<glm::vec3> normalData;
+    std::vector<GLuint> indexData;
+};
+
 struct Model {
     ShaderProgram *shaders;
     Texture *texture;
@@ -56,6 +63,7 @@ struct ModelInstance {
     ModelTransform transform;
     
     ModelInstance() : model(nullptr), transform() {}
+    ModelInstance(Model *model) : model(model), transform() {}
 };
 
 #endif

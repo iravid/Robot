@@ -13,7 +13,10 @@
 
 struct RenderNode {
     ModelInstance *instance;
-    std::list<RenderNode> children;
+    std::list<RenderNode *> children;
+    
+    RenderNode() : instance(nullptr), children() {}
+    RenderNode(ModelInstance *instance) : instance(instance), children() {}
 };
 
 #endif
