@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		260D24D9199FBA9800AC2A21 /* brick_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 260D24D7199FBA9800AC2A21 /* brick_texture.jpg */; };
 		260D24DA199FBA9800AC2A21 /* concrete_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 260D24D8199FBA9800AC2A21 /* concrete_texture.jpg */; };
+		2651E55719A3DF4B00E423D5 /* RoomModel.obj in Resources */ = {isa = PBXBuildFile; fileRef = 2651E55619A3DF4B00E423D5 /* RoomModel.obj */; };
 		26D82A5819A259DE00547694 /* MatrixStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D82A5619A259DE00547694 /* MatrixStack.cpp */; };
 		26D82A5D19A2686300547694 /* metal_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 26D82A5C19A2686300547694 /* metal_texture.jpg */; };
 		26D82BF219A3958000547694 /* RobotModel.obj in Resources */ = {isa = PBXBuildFile; fileRef = 26D82BF119A3958000547694 /* RobotModel.obj */; };
@@ -30,6 +31,7 @@
 /* Begin PBXFileReference section */
 		260D24D7199FBA9800AC2A21 /* brick_texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = brick_texture.jpg; sourceTree = "<group>"; };
 		260D24D8199FBA9800AC2A21 /* concrete_texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = concrete_texture.jpg; sourceTree = "<group>"; };
+		2651E55619A3DF4B00E423D5 /* RoomModel.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = RoomModel.obj; path = textures/RoomModel.obj; sourceTree = "<group>"; };
 		26D82A5619A259DE00547694 /* MatrixStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixStack.cpp; sourceTree = "<group>"; };
 		26D82A5719A259DE00547694 /* MatrixStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MatrixStack.h; sourceTree = "<group>"; };
 		26D82A5919A2605C00547694 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 			children = (
 				26D82BF119A3958000547694 /* RobotModel.obj */,
 				26EDF1BC199F56A900C71FC5 /* fragment-shader.fsh */,
+				2651E55619A3DF4B00E423D5 /* RoomModel.obj */,
 				26EDF1BE199F56B400C71FC5 /* vertex-shader.vsh */,
 			);
 			path = resources;
@@ -208,6 +211,7 @@
 				26EDF1BF199F56B400C71FC5 /* vertex-shader.vsh in Resources */,
 				260D24DA199FBA9800AC2A21 /* concrete_texture.jpg in Resources */,
 				260D24D9199FBA9800AC2A21 /* brick_texture.jpg in Resources */,
+				2651E55719A3DF4B00E423D5 /* RoomModel.obj in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

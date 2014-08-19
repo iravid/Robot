@@ -369,6 +369,42 @@ static Model *loadWallModel() {
     return torso;
 } */
 
+static std::map<std::string, Model *> loadRoomModels() {
+    std::map<std::string, ModelData> roomData = loadModelsFromObj("RoomModel.obj");
+    std::map<std::string, Model *> roomModels;
+    
+    // Ceiling and floor
+    roomModels["Ceiling"] = loadModel(roomData["Ceiling"].vertexData, roomData["Ceiling"].textureData, roomData["Ceiling"].normalData, roomData["Ceiling"].indexData,
+                                       GL_TRIANGLES, roomData["Ceiling"].indexData.size(), 0,
+                                       80.0f, glm::vec3(1.0f),
+                                       "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+    
+    roomModels["Floor"] = loadModel(roomData["Floor"].vertexData, roomData["Floor"].textureData, roomData["Floor"].normalData, roomData["Floor"].indexData,
+                                      GL_TRIANGLES, roomData["Floor"].indexData.size(), 0,
+                                      80.0f, glm::vec3(1.0f),
+                                      "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+    
+    // Walls
+    roomModels["Left_Wall"] = loadModel(roomData["Left_Wall"].vertexData, roomData["Left_Wall"].textureData, roomData["Left_Wall"].normalData, roomData["Left_Wall"].indexData,
+                                    GL_TRIANGLES, roomData["Left_Wall"].indexData.size(), 0,
+                                    80.0f, glm::vec3(1.0f),
+                                    "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+    roomModels["Right_Wall"] = loadModel(roomData["Right_Wall"].vertexData, roomData["Right_Wall"].textureData, roomData["Right_Wall"].normalData, roomData["Right_Wall"].indexData,
+                                        GL_TRIANGLES, roomData["Right_Wall"].indexData.size(), 0,
+                                        80.0f, glm::vec3(1.0f),
+                                        "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+    roomModels["Front_Wall"] = loadModel(roomData["Front_Wall"].vertexData, roomData["Front_Wall"].textureData, roomData["Front_Wall"].normalData, roomData["Front_Wall"].indexData,
+                                        GL_TRIANGLES, roomData["Front_Wall"].indexData.size(), 0,
+                                        80.0f, glm::vec3(1.0f),
+                                        "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+    roomModels["Back_Wall"] = loadModel(roomData["Back_Wall"].vertexData, roomData["Back_Wall"].textureData, roomData["Back_Wall"].normalData, roomData["Back_Wall"].indexData,
+                                        GL_TRIANGLES, roomData["Back_Wall"].indexData.size(), 0,
+                                        80.0f, glm::vec3(1.0f),
+                                        "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+    
+    return roomModels;
+}
+
 static std::map<std::string, Model *> loadRobotModels() {
     // Load the arrays from the file
     std::map<std::string, ModelData> robotData = loadModelsFromObj("RobotModel.obj");
@@ -389,60 +425,21 @@ static void createScene(std::list<RenderNode *>& renderNodes) {
     /*
      * Construct the room
      */
-    Model *floorModel = loadFloorModel();
+    std::map<std::string, Model *> roomModels = loadRoomModels();
     
-    ModelInstance *floorInstance = new ModelInstance();
-    RenderNode *floorNode = new RenderNode();
-    floorInstance->model = floorModel;
-    floorInstance->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
-    floorNode->instance = floorInstance;
-    renderNodes.push_back(floorNode);
-    
-    ModelInstance *ceilingInstance = new ModelInstance();
-    RenderNode *ceilingNode = new RenderNode();
-    ceilingInstance->model = floorModel;
-    ceilingInstance->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 0, 4));
-    ceilingInstance->transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    ceilingInstance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 8, 0));
-    ceilingNode->instance = ceilingInstance;
+    RenderNode *ceilingNode = new RenderNode(new ModelInstance(roomModels["Ceiling"]));
     renderNodes.push_back(ceilingNode);
-    
-    Model *wallModel = loadWallModel();
-    
-    ModelInstance *backWall = new ModelInstance();
-    RenderNode *backWallNode = new RenderNode();
-    backWall->model = wallModel;
-    backWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
-    backWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, -4));
-    backWallNode->instance = backWall;
+    RenderNode *floorNode = new RenderNode(new ModelInstance(roomModels["Floor"]));
+    renderNodes.push_back(floorNode);
+    RenderNode *leftWallNode = new RenderNode(new ModelInstance(roomModels["Left_Wall"]));
+    renderNodes.push_back(leftWallNode);
+    RenderNode *rightWallNode = new RenderNode(new ModelInstance(roomModels["Right_Wall"]));
+    renderNodes.push_back(rightWallNode);
+    RenderNode *frontWallNode = new RenderNode(new ModelInstance(roomModels["Front_Wall"]));
+    renderNodes.push_back(frontWallNode);
+    RenderNode *backWallNode = new RenderNode(new ModelInstance(roomModels["Back_Wall"]));
     renderNodes.push_back(backWallNode);
     
-    ModelInstance *frontWall = new ModelInstance();
-    RenderNode *frontWallNode = new RenderNode();
-    frontWall->model = wallModel;
-    frontWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4, 4, 0));
-    frontWall->transform.rotate = glm::rotate(glm::mat4(), 180.0f, glm::vec3(0, 1.0f, 0));
-    frontWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(0, 4, 4));
-    frontWallNode->instance = frontWall;
-    renderNodes.push_back(frontWallNode);
-    
-    ModelInstance *leftWall = new ModelInstance();
-    RenderNode *leftWallNode = new RenderNode();
-    leftWall->model = wallModel;
-    leftWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
-    leftWall->transform.rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(0, 1.0f, 0));
-    leftWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(-6, 4, 0));
-    leftWallNode->instance = leftWall;
-    renderNodes.push_back(leftWallNode);
-    
-    ModelInstance *rightWall = new ModelInstance();
-    RenderNode *rightWallNode = new RenderNode();
-    rightWall->model = wallModel;
-    rightWall->transform.scale = glm::scale(glm::mat4(), glm::vec3(4.0f / 1.5f, 4.0f, 0.0f));
-    rightWall->transform.rotate = glm::rotate(glm::mat4(), -90.0f, glm::vec3(0, 1.0f, 0));
-    rightWall->transform.translate = glm::translate(glm::mat4(), glm::vec3(6, 4, 0));
-    rightWallNode->instance = rightWall;
-    renderNodes.push_back(rightWallNode);
     
     /*
      * Construct the Robot from its various parts
@@ -464,7 +461,7 @@ static void createScene(std::list<RenderNode *>& renderNodes) {
     torsoNode->children.push_back(leftArmNode);
     torsoNode->children.push_back(rightArmNode);
     torsoNode->children.push_back(headNode);
-    
+        
     renderNodes.push_back(torsoNode);
 }
 
