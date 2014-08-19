@@ -18,7 +18,8 @@ struct Model {
     ShaderProgram *shaders;
     Texture *texture;
     
-    GLuint vbo; // Vertex (and texture coordinates) buffer
+    GLuint vbo; // Vertex buffer
+    GLuint tbo; // Texture coordinates buffer
     GLuint nbo; // Normal coordinates buffer
     GLuint vao; // Vertex array
     GLuint ebo; // Index buffer

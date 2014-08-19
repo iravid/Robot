@@ -1,7 +1,8 @@
 #version 150
 
-uniform mat4 camera;
 uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 in vec3 vert;
 in vec2 vertTextureCoord;
@@ -17,5 +18,5 @@ void main() {
     fragVert = vert;
     
     // Apply the camera and model transformations to vert
-    gl_Position = camera * model * vec4(vert, 1);
+    gl_Position = projection * view * model * vec4(vert, 1);
 }
