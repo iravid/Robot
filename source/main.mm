@@ -485,13 +485,6 @@ void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransfo
     shaders->setUniform("view", camera.view());
     shaders->setUniform("projection", camera.projection());
     shaders->setUniform("materialTexture", 0);
-//    shaders->setUniform("materialShininess", model->shininess);
-//    shaders->setUniform("materialSpecularColor", model->specularColor);
-    shaders->setUniform("light.position", light.position);
-    shaders->setUniform("light.intensities", light.intensities);
-    shaders->setUniform("light.attentuation", light.attentuation);
-    shaders->setUniform("light.ambientCoefficient", light.ambientCoefficient);
-//    shaders->setUniform("cameraPosition", camera.position());
     
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
@@ -633,12 +626,6 @@ void AppMain() {
     camera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     camera.setNearAndFarPlanes(0.2f, 100.0f);
     camera.setFieldOfView(65.0f);
-    
-    // Setup light source parameters
-    light.position = glm::vec3(-5, 3, 2);
-    light.intensities = glm::vec3(1.0f, 1.0f, 1.0f); // white
-    light.attentuation = 0.002f;
-    light.ambientCoefficient = 0.5f;
     
     while (!glfwWindowShouldClose(window)) {
         updatePositions();
