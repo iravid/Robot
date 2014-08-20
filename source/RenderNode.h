@@ -9,11 +9,14 @@
 #ifndef Robot_RenderNode_h
 #define Robot_RenderNode_h
 
+#include <map>
+#include <string>
+
 #include "Model.h"
 
 struct RenderNode {
     ModelInstance *instance;
-    std::list<RenderNode *> children;
+    std::map<std::string, RenderNode *> children;
     
     RenderNode() : instance(nullptr), children() {}
     RenderNode(ModelInstance *instance) : instance(instance), children() {}

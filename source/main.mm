@@ -27,9 +27,38 @@
 #include "RenderNode.h"
 #include "Loaders.h"
 
-const glm::vec2 SCREEN_SIZE(1680, 1050);
+float clampToMaxVertical(float angle, float addition) {
+    if (angle + addition > 60)
+        return 60;
+    else if (angle + addition < -60)
+        return -60;
+    
+    return angle + addition;
+}
+
+struct Orientations {
+    float headHorizontal;
+    float headVertical;
+    
+    float torsoHorizontal;
+    
+    float leftArmVertical;
+    float leftWristVertical;
+    
+    float rightArmVertical;
+    float rightWristVertical;
+    
+    Orientations() : headHorizontal(0), headVertical(0), torsoHorizontal(0),
+        leftArmVertical(0), leftWristVertical(0), rightArmVertical(0), rightWristVertical(0) {}
+};
+
+const glm::vec2 initialScreenSize(1680, 1050);
 Light light;
 Camera camera;
+bool cameraInHead = false;
+GLFWwindow *window;
+std::map<std::string, RenderNode *> scene;
+Orientations orientations;
 
 static Model *loadModel(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
                         GLenum drawType, GLuint drawCount, GLuint drawStart,
@@ -88,30 +117,30 @@ static std::map<std::string, Model *> loadRoomModels() {
     
     // Ceiling and floor
     roomModels["Ceiling"] = loadModel(roomData["Ceiling"].vertexData, roomData["Ceiling"].textureData, roomData["Ceiling"].normalData, roomData["Ceiling"].indexData,
-                                       GL_TRIANGLES, roomData["Ceiling"].indexData.size(), 0,
+                                       GL_TRIANGLES, (GLuint) roomData["Ceiling"].indexData.size(), 0,
                                        80.0f, glm::vec3(1.0f),
                                        "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
     roomModels["Floor"] = loadModel(roomData["Floor"].vertexData, roomData["Floor"].textureData, roomData["Floor"].normalData, roomData["Floor"].indexData,
-                                      GL_TRIANGLES, roomData["Floor"].indexData.size(), 0,
+                                      GL_TRIANGLES, (GLuint) roomData["Floor"].indexData.size(), 0,
                                       80.0f, glm::vec3(1.0f),
                                       "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
     // Walls
     roomModels["Left_Wall"] = loadModel(roomData["Left_Wall"].vertexData, roomData["Left_Wall"].textureData, roomData["Left_Wall"].normalData, roomData["Left_Wall"].indexData,
-                                    GL_TRIANGLES, roomData["Left_Wall"].indexData.size(), 0,
+                                    GL_TRIANGLES, (GLuint) roomData["Left_Wall"].indexData.size(), 0,
                                     80.0f, glm::vec3(1.0f),
                                     "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     roomModels["Right_Wall"] = loadModel(roomData["Right_Wall"].vertexData, roomData["Right_Wall"].textureData, roomData["Right_Wall"].normalData, roomData["Right_Wall"].indexData,
-                                        GL_TRIANGLES, roomData["Right_Wall"].indexData.size(), 0,
+                                        GL_TRIANGLES, (GLuint) roomData["Right_Wall"].indexData.size(), 0,
                                         80.0f, glm::vec3(1.0f),
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     roomModels["Front_Wall"] = loadModel(roomData["Front_Wall"].vertexData, roomData["Front_Wall"].textureData, roomData["Front_Wall"].normalData, roomData["Front_Wall"].indexData,
-                                        GL_TRIANGLES, roomData["Front_Wall"].indexData.size(), 0,
+                                        GL_TRIANGLES, (GLuint) roomData["Front_Wall"].indexData.size(), 0,
                                         80.0f, glm::vec3(1.0f),
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     roomModels["Back_Wall"] = loadModel(roomData["Back_Wall"].vertexData, roomData["Back_Wall"].textureData, roomData["Back_Wall"].normalData, roomData["Back_Wall"].indexData,
-                                        GL_TRIANGLES, roomData["Back_Wall"].indexData.size(), 0,
+                                        GL_TRIANGLES, (GLuint) roomData["Back_Wall"].indexData.size(), 0,
                                         80.0f, glm::vec3(1.0f),
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
@@ -134,24 +163,24 @@ static std::map<std::string, Model *> loadRobotModels() {
     return robotModels;
 }
 
-static void createScene(std::list<RenderNode *>& renderNodes) {
+static void createScene() {
     /*
      * Construct the room
      */
     std::map<std::string, Model *> roomModels = loadRoomModels();
     
     RenderNode *ceilingNode = new RenderNode(new ModelInstance(roomModels["Ceiling"]));
-    renderNodes.push_back(ceilingNode);
+    scene["Ceiling"] = ceilingNode;
     RenderNode *floorNode = new RenderNode(new ModelInstance(roomModels["Floor"]));
-    renderNodes.push_back(floorNode);
+    scene["Floor"] = floorNode;
     RenderNode *leftWallNode = new RenderNode(new ModelInstance(roomModels["Left_Wall"]));
-    renderNodes.push_back(leftWallNode);
+    scene["Left_Wall"] = leftWallNode;
     RenderNode *rightWallNode = new RenderNode(new ModelInstance(roomModels["Right_Wall"]));
-    renderNodes.push_back(rightWallNode);
+    scene["Right_Wall"] = rightWallNode;
     RenderNode *frontWallNode = new RenderNode(new ModelInstance(roomModels["Front_Wall"]));
-    renderNodes.push_back(frontWallNode);
+    scene["Front_Wall"] = frontWallNode;
     RenderNode *backWallNode = new RenderNode(new ModelInstance(roomModels["Back_Wall"]));
-    renderNodes.push_back(backWallNode);
+    scene["Back_Wall"] = backWallNode;
     
     
     /*
@@ -167,19 +196,24 @@ static void createScene(std::list<RenderNode *>& renderNodes) {
     RenderNode *rightLegNode = new RenderNode(new ModelInstance(robotModels["R_Leg"]));
     RenderNode *leftLegNode = new RenderNode(new ModelInstance(robotModels["L_Leg"]));
     
-    rightArmNode->children.push_back(rightWristNode);
-    leftArmNode->children.push_back(leftWristNode);
-    torsoNode->children.push_back(leftLegNode);
-    torsoNode->children.push_back(rightLegNode);
-    torsoNode->children.push_back(leftArmNode);
-    torsoNode->children.push_back(rightArmNode);
-    torsoNode->children.push_back(headNode);
-        
-    renderNodes.push_back(torsoNode);
-}
-
-void updatePositions() {
+    // All the translations that we wrote down in Blender
+    headNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(-0.0050, 1.6611, -0.0563));
+    leftArmNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(-0.0672, 0.2466, -1.4236));
+    leftWristNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(-0.0092, -1.2856, -0.0097));
+    rightArmNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(-0.0580, 0.2572, 1.4286));
+    rightWristNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(-0.0092, -1.2856, -0.0097));
+    rightLegNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0.0881, -1.8537, 0.5387));
+    leftLegNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0.0881, -1.8541, -0.5452));
+    torsoNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0.0, 2.577, 0.0));
     
+    rightArmNode->children["Right_Wrist"] = rightWristNode;
+    leftArmNode->children["Left_Wrist"] = leftWristNode;
+    torsoNode->children["Left_Leg"] = leftLegNode;
+    torsoNode->children["Right_Leg"] = rightLegNode;
+    torsoNode->children["Left_Arm"] = leftArmNode;
+    torsoNode->children["Right_Arm"] = rightArmNode;
+    torsoNode->children["Head"] = headNode;
+    scene["Torso"] = torsoNode;
 }
 
 // Render a single instance
@@ -214,9 +248,9 @@ void renderRecursive(const RenderNode *node, MatrixStack& modelTransformStack) {
     modelTransformStack.push(node->instance->transform.matrix());
     
     // Render all children recursively
-    std::list<RenderNode *>::const_iterator it;
+    std::map<std::string, RenderNode *>::const_iterator it;
     for (it = node->children.begin(); it != node->children.end(); ++it)
-        renderRecursive(*it, modelTransformStack);
+        renderRecursive(it->second, modelTransformStack);
     
     // Render this instance
     renderInstance(*(node->instance), modelTransformStack.multiplyMatrices());
@@ -225,50 +259,136 @@ void renderRecursive(const RenderNode *node, MatrixStack& modelTransformStack) {
     modelTransformStack.pop();
 }
 
-void renderFrame(const std::list<RenderNode *>& scene) {
+void renderFrame(const std::map<std::string, RenderNode *>& scene) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     MatrixStack matrixStack;
     
-    std::list<RenderNode *>::const_iterator it;
+    std::map<std::string, RenderNode *>::const_iterator it;
     for (it = scene.begin(); it != scene.end(); ++it)
-        renderRecursive(*it, matrixStack);
+        renderRecursive(it->second, matrixStack);
 }
 
 static void glfwErrorCallbackFunc(int error, const char *desc) {
     std::cerr << "GLFW error description:" << std::endl << desc << std::endl;
 }
 
-static void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+static glm::mat4 getCameraInHeadMatrix() {
+    glm::mat4 torsoModelMatrix = scene["Torso"]->instance->transform.matrix();
+    glm::mat4 headModelMatrix = scene["Torso"]->children["Head"]->instance->transform.matrix();
+    
+    return torsoModelMatrix * headModelMatrix;
+}
+
+
+
+void updatePositions(float timeDiff) {
+    const float movementSpeed = 1.5f;
+    float headVerticalDiff = 0, headHorizontalDiff = 0, torsoHorizontalDiff = 0, leftArmVerticalDiff = 0, leftWristVerticalDiff = 0, rightArmVerticalDiff = 0, rightWristVerticalDiff = 0;
+    float torsoTranslationDiff = 0;
+    
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
     
-    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-        if (light.ambientCoefficient < 1.0f)
-            light.ambientCoefficient += 1.0f;
-        else
-            light.ambientCoefficient -= 1.0f;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
+        light.ambientCoefficient += 0.1f;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
+        light.ambientCoefficient -= 0.1f;
+    
+    if (!cameraInHead) {
+        // Camera movement
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera.offsetPosition(timeDiff * movementSpeed * camera.forward());
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera.offsetPosition(timeDiff * movementSpeed * -camera.forward());
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera.offsetPosition(timeDiff * movementSpeed * -camera.right());
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera.offsetPosition(timeDiff * movementSpeed * camera.right());
+        
+        const float mouseSensitivity = 0.1f;
+        double mouseX, mouseY;
+        
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+        camera.offsetOrientation(mouseSensitivity * mouseY, mouseSensitivity * mouseX);
+        glfwSetCursorPos(window, 0, 0);
     }
     
-    if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(-5.0f, 0.0f);
-    if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(5.0f, 0.0f);
-    if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(0.0f, 5.0f);
-    if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetOrientation(0.0f, -5.0f);
+    // Head movement
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        headHorizontalDiff += 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+        headHorizontalDiff -= 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        headVerticalDiff += 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+        headVerticalDiff -= 45.0f * timeDiff;
     
-    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetPosition(camera.forward());
-    if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetPosition(-camera.forward());
-    if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetPosition(-camera.right());
-    if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
-        camera.offsetPosition(camera.right());
+    // Position camera at head
+    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
+        cameraInHead = !cameraInHead;
+        if (!cameraInHead)
+            camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
+    }
     
+    if (cameraInHead)
+        camera.setPosition(glm::vec3(getCameraInHeadMatrix() * glm::vec4(0.0)));
+    
+    // Torso movement
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+        torsoTranslationDiff += timeDiff * movementSpeed;
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+        torsoTranslationDiff -= timeDiff * movementSpeed;
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        torsoHorizontalDiff += 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+        torsoHorizontalDiff -= 45.0f * timeDiff;
+    
+    // Arms
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+        leftArmVerticalDiff += 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        leftArmVerticalDiff -= 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+        rightArmVerticalDiff += 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+        rightArmVerticalDiff -= 45.0f * timeDiff;
+    
+    // Wrists
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+        leftWristVerticalDiff += 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+        leftWristVerticalDiff -= 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+        rightWristVerticalDiff += 45.0f * timeDiff;
+    if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
+        rightWristVerticalDiff -= 45.0f * timeDiff;
+    
+    // Update all orientations
+    torsoHorizontalDiff = fmodf(torsoHorizontalDiff, 360.0f);
+    if (torsoHorizontalDiff < 0.0f)
+        torsoHorizontalDiff += 360.0f;
+    
+    orientations.torsoHorizontal += torsoHorizontalDiff;
+    orientations.headHorizontal += headHorizontalDiff;
+    orientations.headVertical = clampToMaxVertical(orientations.headVertical, headVerticalDiff);
+    orientations.leftArmVertical = clampToMaxVertical(orientations.leftArmVertical, leftArmVerticalDiff);
+    orientations.leftWristVertical = clampToMaxVertical(orientations.leftWristVertical, leftWristVerticalDiff);
+    orientations.rightArmVertical = clampToMaxVertical(orientations.rightArmVertical, rightArmVerticalDiff);
+    orientations.rightWristVertical = clampToMaxVertical(orientations.rightWristVertical, rightWristVerticalDiff);
+    
+    // Update matrices
+    scene["Torso"]->instance->transform.translate *= glm::translate(glm::mat4(), glm::vec3(torsoTranslationDiff, 0.0f, 0.0f));
+    scene["Torso"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.torsoHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
+    
+    scene["Torso"]->children["Head"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.headHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
+    scene["Torso"]->children["Head"]->instance->transform.rotate *= glm::rotate(glm::mat4(), orientations.headVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    scene["Torso"]->children["Left_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    scene["Torso"]->children["Left_Arm"]->children["Left_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    scene["Torso"]->children["Right_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    scene["Torso"]->children["Right_Arm"]->children["Right_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height) {
@@ -276,8 +396,6 @@ void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height
 }
 
 void AppMain() {
-    GLFWwindow *window;
-    
     glfwSetErrorCallback(glfwErrorCallbackFunc);
     
     // Initialize GLFW
@@ -292,12 +410,14 @@ void AppMain() {
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     
     // Create the window
-    window = glfwCreateWindow(SCREEN_SIZE.x, SCREEN_SIZE.y, "Robot", nullptr, nullptr);
+    window = glfwCreateWindow(initialScreenSize.x, initialScreenSize.y, "Robot", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         throw std::runtime_error("Error creating GLFW window");
     }
     
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(window, 0, 0);
     glfwSetFramebufferSizeCallback(window, glfwFramebufferResizeCallbackFunc);
     glfwMakeContextCurrent(window);
     
@@ -325,20 +445,21 @@ void AppMain() {
     // Enable depth-testing
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-        
-    glfwSetKeyCallback(window, glfwKeyCallbackFunc);
     
-    std::list<RenderNode *> scene;
-    createScene(scene);
+    createScene();
     
     // Orient camera
     camera.setPosition(glm::vec3(0, 2, 0));
-    camera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+    camera.setViewportAspectRatio(initialScreenSize.x / initialScreenSize.y);
     camera.setNearAndFarPlanes(0.2f, 100.0f);
     camera.setFieldOfView(65.0f);
     
+    double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
-        updatePositions();
+        double currentTime = glfwGetTime();
+        updatePositions(currentTime - lastTime);
+        lastTime = currentTime;
+        
         renderFrame(scene);
         glfwSwapBuffers(window);
         
