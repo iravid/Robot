@@ -37,14 +37,17 @@ struct Model {
     GLint drawCount;
     
     // Lighting parameters
+    glm::vec4 ambientColor;
+    glm::vec4 diffuseColor;
+    glm::vec4 specularColor;
     GLfloat shininess;
-    glm::vec3 specularColor;
+
     
     // Constructor
     Model() : shaders(nullptr), texture(nullptr),
             vbo(0), nbo(0), vao(0), ebo(0),
             drawType(GL_TRIANGLES), drawStart(0), drawCount(0),
-            shininess(0.0f), specularColor(1.0f, 1.0f, 1.0f) {}
+            ambientColor(1.0f), diffuseColor(1.0f), specularColor(1.0f), shininess(0.0f) {}
 };
 
 struct ModelTransform {

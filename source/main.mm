@@ -67,7 +67,7 @@ Orientations orientations;
 
 static Model *loadModel(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
                         GLenum drawType, GLuint drawCount, GLuint drawStart,
-                        GLfloat shininess, glm::vec3 specularColor,
+                        glm::vec4 ambientColor, glm::vec4 diffuseColor, glm::vec4 specularColor, GLfloat shininess,
                         const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath) {
     Model *model = new Model();
     model->shaders = programWithShaders(vertexShaderPath, fragmentShaderPath);
@@ -123,30 +123,30 @@ static std::map<std::string, Model *> loadRoomModels() {
     // Ceiling and floor
     roomModels["Ceiling"] = loadModel(roomData["Ceiling"].vertexData, roomData["Ceiling"].textureData, roomData["Ceiling"].normalData, roomData["Ceiling"].indexData,
                                        GL_TRIANGLES, (GLuint) roomData["Ceiling"].indexData.size(), 0,
-                                       80.0f, glm::vec3(1.0f),
+                                      glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 40.0f,
                                        "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
     roomModels["Floor"] = loadModel(roomData["Floor"].vertexData, roomData["Floor"].textureData, roomData["Floor"].normalData, roomData["Floor"].indexData,
                                       GL_TRIANGLES, (GLuint) roomData["Floor"].indexData.size(), 0,
-                                      80.0f, glm::vec3(1.0f),
+                                      glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 40.0f,
                                       "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
     // Walls
     roomModels["Left_Wall"] = loadModel(roomData["Left_Wall"].vertexData, roomData["Left_Wall"].textureData, roomData["Left_Wall"].normalData, roomData["Left_Wall"].indexData,
                                     GL_TRIANGLES, (GLuint) roomData["Left_Wall"].indexData.size(), 0,
-                                    80.0f, glm::vec3(1.0f),
+                                      glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                     "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     roomModels["Right_Wall"] = loadModel(roomData["Right_Wall"].vertexData, roomData["Right_Wall"].textureData, roomData["Right_Wall"].normalData, roomData["Right_Wall"].indexData,
                                         GL_TRIANGLES, (GLuint) roomData["Right_Wall"].indexData.size(), 0,
-                                        80.0f, glm::vec3(1.0f),
+                                      glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     roomModels["Front_Wall"] = loadModel(roomData["Front_Wall"].vertexData, roomData["Front_Wall"].textureData, roomData["Front_Wall"].normalData, roomData["Front_Wall"].indexData,
                                         GL_TRIANGLES, (GLuint) roomData["Front_Wall"].indexData.size(), 0,
-                                        80.0f, glm::vec3(1.0f),
+                                      glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     roomModels["Back_Wall"] = loadModel(roomData["Back_Wall"].vertexData, roomData["Back_Wall"].textureData, roomData["Back_Wall"].normalData, roomData["Back_Wall"].indexData,
                                         GL_TRIANGLES, (GLuint) roomData["Back_Wall"].indexData.size(), 0,
-                                        80.0f, glm::vec3(1.0f),
+                                      glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
     return roomModels;
@@ -160,7 +160,7 @@ static std::map<std::string, Model *> loadRobotModels() {
     for (std::map<std::string, ModelData>::const_iterator it = robotData.begin(); it != robotData.end(); ++it) {
         Model *model = loadModel(it->second.vertexData, it->second.textureData, it->second.normalData, it->second.indexData,
                                  GL_TRIANGLES, 36, 0,
-                                 120.0f, glm::vec3(1.0f),
+                                 glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 120.0f,
                                  "metal_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
         robotModels[it->first] = model;
     }
@@ -186,7 +186,6 @@ static void createScene() {
     scene["Front_Wall"] = frontWallNode;
     RenderNode *backWallNode = new RenderNode(new ModelInstance(roomModels["Back_Wall"]));
     scene["Back_Wall"] = backWallNode;
-    
     
     /*
      * Construct the Robot from its various parts
@@ -233,7 +232,18 @@ void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransfo
     shaders->setUniform("model", modelTransform);
     shaders->setUniform("view", camera.view());
     shaders->setUniform("projection", camera.projection());
+    
     shaders->setUniform("materialTexture", 0);
+    shaders->setUniform("material.ambient", model->ambientColor);
+    shaders->setUniform("material.diffuse", model->diffuseColor);
+    shaders->setUniform("material.specular", model->specularColor);
+    shaders->setUniform("material.shininess", model->shininess);
+    
+    shaders->setUniform("light.position", light.position);
+    shaders->setUniform("light.diffuse", light.diffuseColor);
+    shaders->setUniform("light.specular", light.specularColor);
+    shaders->setUniform("light.ambient", light.ambientColor);
+    shaders->setUniform("light.attenuation", light.attentuation);
     
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
@@ -295,9 +305,9 @@ void updatePositions(float timeDiff) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     
     if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
-        light.ambientCoefficient += 0.1f;
+        light.ambientColor += 0.1;
     if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
-        light.ambientCoefficient -= 0.1f;
+        light.ambientColor -= 0.1;
     
     if (!cameraInHead) {
         // Camera movement
@@ -479,6 +489,12 @@ void AppMain() {
     camera.setViewportAspectRatio(initialScreenSize.x / initialScreenSize.y);
     camera.setNearAndFarPlanes(0.2f, 100.0f);
     camera.setFieldOfView(65.0f);
+    
+    light.position = glm::vec4(5.0, 3.0, -2.0, 1.0);
+    light.diffuseColor = glm::vec4(0.5);
+    light.specularColor = glm::vec4(1.0);
+    light.ambientColor = glm::vec4(1.5);
+    light.attentuation = 1.2;
     
     double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
