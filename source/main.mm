@@ -11,6 +11,7 @@
 #include <list>
 #include <string>
 #include <map>
+#include <math.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -36,6 +37,10 @@ float clampToMaxVertical(float angle, float addition) {
     return angle + addition;
 }
 
+static inline float degreesToRadians(float degrees) {
+    return degrees * (float) M_PI / 180.0f;
+}
+
 struct Orientations {
     float headHorizontal;
     float headVertical;
@@ -52,7 +57,7 @@ struct Orientations {
         leftArmVertical(0), leftWristVertical(0), rightArmVertical(0), rightWristVertical(0) {}
 };
 
-const glm::vec2 initialScreenSize(1680, 1050);
+const glm::vec2 initialScreenSize(800, 600);
 Light light;
 Camera camera;
 bool cameraInHead = false;
@@ -204,7 +209,7 @@ static void createScene() {
     rightWristNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(-0.0092, -1.2856, -0.0097));
     rightLegNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0.0881, -1.8537, 0.5387));
     leftLegNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0.0881, -1.8541, -0.5452));
-    torsoNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0.0, 2.577, 0.0));
+    torsoNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(0.0, 2.0, 0.0));
     
     rightArmNode->children["Right_Wrist"] = rightWristNode;
     leftArmNode->children["Left_Wrist"] = leftWristNode;
@@ -275,13 +280,11 @@ static void glfwErrorCallbackFunc(int error, const char *desc) {
 }
 
 static glm::mat4 getCameraInHeadMatrix() {
-    glm::mat4 torsoModelMatrix = scene["Torso"]->instance->transform.matrix();
-    glm::mat4 headModelMatrix = scene["Torso"]->children["Head"]->instance->transform.matrix();
+    ModelTransform torsoTransform = scene["Torso"]->instance->transform;
+    ModelTransform headTransform = scene["Torso"]->children["Head"]->instance->transform;
     
-    return torsoModelMatrix * headModelMatrix;
+    return torsoTransform.matrix() * headTransform.matrix();
 }
-
-
 
 void updatePositions(float timeDiff) {
     const float movementSpeed = 1.5f;
@@ -325,16 +328,6 @@ void updatePositions(float timeDiff) {
     if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
         headVerticalDiff -= 45.0f * timeDiff;
     
-    // Position camera at head
-    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
-        cameraInHead = !cameraInHead;
-        if (!cameraInHead)
-            camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
-    }
-    
-    if (cameraInHead)
-        camera.setPosition(glm::vec3(getCameraInHeadMatrix() * glm::vec4(0.0)));
-    
     // Torso movement
     if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
         torsoTranslationDiff += timeDiff * movementSpeed;
@@ -366,11 +359,12 @@ void updatePositions(float timeDiff) {
         rightWristVerticalDiff -= 45.0f * timeDiff;
     
     // Update all orientations
-    torsoHorizontalDiff = fmodf(torsoHorizontalDiff, 360.0f);
-    if (torsoHorizontalDiff < 0.0f)
-        torsoHorizontalDiff += 360.0f;
-    
     orientations.torsoHorizontal += torsoHorizontalDiff;
+    
+    orientations.torsoHorizontal = fmodf(orientations.torsoHorizontal, 360.0f);
+    if (orientations.torsoHorizontal < 0.0f)
+        orientations.torsoHorizontal += 360.0f;
+    
     orientations.headHorizontal += headHorizontalDiff;
     orientations.headVertical = clampToMaxVertical(orientations.headVertical, headVerticalDiff);
     orientations.leftArmVertical = clampToMaxVertical(orientations.leftArmVertical, leftArmVerticalDiff);
@@ -378,12 +372,21 @@ void updatePositions(float timeDiff) {
     orientations.rightArmVertical = clampToMaxVertical(orientations.rightArmVertical, rightArmVerticalDiff);
     orientations.rightWristVertical = clampToMaxVertical(orientations.rightWristVertical, rightWristVerticalDiff);
     
+    float xTrans, zTrans;
+    xTrans = torsoTranslationDiff * cosf(degreesToRadians(orientations.torsoHorizontal));
+    zTrans = -torsoTranslationDiff * sinf(degreesToRadians(orientations.torsoHorizontal));
+    
     // Update matrices
-    scene["Torso"]->instance->transform.translate *= glm::translate(glm::mat4(), glm::vec3(torsoTranslationDiff, 0.0f, 0.0f));
+    scene["Torso"]->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(xTrans, 0.0f, zTrans)) * scene["Torso"]->instance->transform.translate;
     scene["Torso"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.torsoHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
     
     scene["Torso"]->children["Head"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.headHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
     scene["Torso"]->children["Head"]->instance->transform.rotate *= glm::rotate(glm::mat4(), orientations.headVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    if (cameraInHead) {
+        camera.offsetPosition(glm::vec3(xTrans, 0.0, zTrans));
+        camera.offsetOrientation(headVerticalDiff, - (torsoHorizontalDiff + headHorizontalDiff));
+    }
     
     scene["Torso"]->children["Left_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
     scene["Torso"]->children["Left_Arm"]->children["Left_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -393,6 +396,24 @@ void updatePositions(float timeDiff) {
 
 void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height) {
     camera.setViewportAspectRatio((float) width / (float) height);
+}
+
+void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+        cameraInHead = !cameraInHead;
+    
+        if (cameraInHead) {
+            camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
+            camera.lookAt(glm::vec3(0, 2, -1));
+            camera.setPosition(glm::vec3(getCameraInHeadMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0)));
+            camera.offsetOrientation(orientations.headVertical, - (orientations.headHorizontal + orientations.torsoHorizontal - 90.0f));
+        }
+        
+        if (!cameraInHead) {
+            camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
+            camera.lookAt(glm::vec3(0, 2, -1));
+        }
+    }
 }
 
 void AppMain() {
@@ -419,6 +440,7 @@ void AppMain() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPos(window, 0, 0);
     glfwSetFramebufferSizeCallback(window, glfwFramebufferResizeCallbackFunc);
+    glfwSetKeyCallback(window, glfwKeyCallbackFunc);
     glfwMakeContextCurrent(window);
     
     // Initialize GLEW
@@ -446,10 +468,14 @@ void AppMain() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     
+    // Enable back-face-culling
+    glEnable(GL_CULL_FACE);
+    
     createScene();
     
     // Orient camera
     camera.setPosition(glm::vec3(0, 2, 0));
+    camera.lookAt(glm::vec3(0, 2, -1));
     camera.setViewportAspectRatio(initialScreenSize.x / initialScreenSize.y);
     camera.setNearAndFarPlanes(0.2f, 100.0f);
     camera.setFieldOfView(65.0f);
