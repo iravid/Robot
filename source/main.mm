@@ -58,11 +58,11 @@ struct Orientations {
 };
 
 const glm::vec2 initialScreenSize(800, 600);
-Light lightSource;
-Camera camera;
+Light _lightSource;
+Camera _camera;
 bool cameraInHead = false;
-GLFWwindow *window;
-std::map<std::string, RenderNode *> scene;
+GLFWwindow *_window;
+std::map<std::string, RenderNode *> _scene;
 Orientations orientations;
 
 static Model *loadModel(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
@@ -175,17 +175,17 @@ static void createScene() {
     std::map<std::string, Model *> roomModels = loadRoomModels();
     
     RenderNode *ceilingNode = new RenderNode(new ModelInstance(roomModels["Ceiling"]));
-    scene["Ceiling"] = ceilingNode;
+    _scene["Ceiling"] = ceilingNode;
     RenderNode *floorNode = new RenderNode(new ModelInstance(roomModels["Floor"]));
-    scene["Floor"] = floorNode;
+    _scene["Floor"] = floorNode;
     RenderNode *leftWallNode = new RenderNode(new ModelInstance(roomModels["Left_Wall"]));
-    scene["Left_Wall"] = leftWallNode;
+    _scene["Left_Wall"] = leftWallNode;
     RenderNode *rightWallNode = new RenderNode(new ModelInstance(roomModels["Right_Wall"]));
-    scene["Right_Wall"] = rightWallNode;
+    _scene["Right_Wall"] = rightWallNode;
     RenderNode *frontWallNode = new RenderNode(new ModelInstance(roomModels["Front_Wall"]));
-    scene["Front_Wall"] = frontWallNode;
+    _scene["Front_Wall"] = frontWallNode;
     RenderNode *backWallNode = new RenderNode(new ModelInstance(roomModels["Back_Wall"]));
-    scene["Back_Wall"] = backWallNode;
+    _scene["Back_Wall"] = backWallNode;
     
     /*
      * Construct the Robot from its various parts
@@ -217,7 +217,7 @@ static void createScene() {
     torsoNode->children["Left_Arm"] = leftArmNode;
     torsoNode->children["Right_Arm"] = rightArmNode;
     torsoNode->children["Head"] = headNode;
-    scene["Torso"] = torsoNode;
+    _scene["Torso"] = torsoNode;
 }
 
 // Render a single instance
@@ -230,8 +230,8 @@ void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransfo
     
     // Set the uniforms
     shaders->setUniform("model", modelTransform);
-    shaders->setUniform("view", camera.view());
-    shaders->setUniform("projection", camera.projection());
+    shaders->setUniform("view", _camera.view());
+    shaders->setUniform("projection", _camera.projection());
     
     shaders->setUniform("materialTexture", 0);
     shaders->setUniform("material.ambient", model->ambientColor);
@@ -239,11 +239,11 @@ void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransfo
     shaders->setUniform("material.specular", model->specularColor);
     shaders->setUniform("material.shininess", model->shininess);
     
-    shaders->setUniform("light.position", lightSource.position);
-    shaders->setUniform("light.diffuse", lightSource.diffuseColor);
-    shaders->setUniform("light.specular", lightSource.specularColor);
-    shaders->setUniform("light.ambient", lightSource.ambientColor);
-    shaders->setUniform("light.attenuation", lightSource.attentuation);
+    shaders->setUniform("light.position", _lightSource.position);
+    shaders->setUniform("light.diffuse", _lightSource.diffuseColor);
+    shaders->setUniform("light.specular", _lightSource.specularColor);
+    shaders->setUniform("light.ambient", _lightSource.ambientColor);
+    shaders->setUniform("light.attenuation", _lightSource.attentuation);
     
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
@@ -290,8 +290,8 @@ static void glfwErrorCallbackFunc(int error, const char *desc) {
 }
 
 static glm::mat4 getCameraInHeadMatrix() {
-    ModelTransform torsoTransform = scene["Torso"]->instance->transform;
-    ModelTransform headTransform = scene["Torso"]->children["Head"]->instance->transform;
+    ModelTransform torsoTransform = _scene["Torso"]->instance->transform;
+    ModelTransform headTransform = _scene["Torso"]->children["Head"]->instance->transform;
     
     return torsoTransform.matrix() * headTransform.matrix();
 }
@@ -301,71 +301,71 @@ void updatePositions(float timeDiff) {
     float headVerticalDiff = 0, headHorizontalDiff = 0, torsoHorizontalDiff = 0, leftArmVerticalDiff = 0, leftWristVerticalDiff = 0, rightArmVerticalDiff = 0, rightWristVerticalDiff = 0;
     float torsoTranslationDiff = 0;
     
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
+    if (glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(_window, GL_TRUE);
     
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
-        lightSource.ambientColor += 0.1;
-    if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
-        lightSource.ambientColor -= 0.1;
+    if (glfwGetKey(_window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
+        _lightSource.ambientColor += 0.1;
+    if (glfwGetKey(_window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
+        _lightSource.ambientColor -= 0.1;
     
     if (!cameraInHead) {
         // Camera movement
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.offsetPosition(timeDiff * movementSpeed * camera.forward());
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.offsetPosition(timeDiff * movementSpeed * -camera.forward());
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.offsetPosition(timeDiff * movementSpeed * -camera.right());
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.offsetPosition(timeDiff * movementSpeed * camera.right());
+        if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
+            _camera.offsetPosition(timeDiff * movementSpeed * _camera.forward());
+        if (glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
+            _camera.offsetPosition(timeDiff * movementSpeed * -_camera.forward());
+        if (glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
+            _camera.offsetPosition(timeDiff * movementSpeed * -_camera.right());
+        if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
+            _camera.offsetPosition(timeDiff * movementSpeed * _camera.right());
         
         const float mouseSensitivity = 0.1f;
         double mouseX, mouseY;
         
-        glfwGetCursorPos(window, &mouseX, &mouseY);
-        camera.offsetOrientation(mouseSensitivity * mouseY, mouseSensitivity * mouseX);
-        glfwSetCursorPos(window, 0, 0);
+        glfwGetCursorPos(_window, &mouseX, &mouseY);
+        _camera.offsetOrientation(mouseSensitivity * mouseY, mouseSensitivity * mouseX);
+        glfwSetCursorPos(_window, 0, 0);
     }
     
     // Head movement
-    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_Z) == GLFW_PRESS)
         headHorizontalDiff += 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_X) == GLFW_PRESS)
         headHorizontalDiff -= 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_C) == GLFW_PRESS)
         headVerticalDiff += 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_V) == GLFW_PRESS)
         headVerticalDiff -= 45.0f * timeDiff;
     
     // Torso movement
-    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_I) == GLFW_PRESS)
         torsoTranslationDiff += timeDiff * movementSpeed;
-    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_K) == GLFW_PRESS)
         torsoTranslationDiff -= timeDiff * movementSpeed;
-    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_J) == GLFW_PRESS)
         torsoHorizontalDiff += 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_L) == GLFW_PRESS)
         torsoHorizontalDiff -= 45.0f * timeDiff;
     
     // Arms
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_1) == GLFW_PRESS)
         leftArmVerticalDiff += 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_2) == GLFW_PRESS)
         leftArmVerticalDiff -= 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_3) == GLFW_PRESS)
         rightArmVerticalDiff += 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_4) == GLFW_PRESS)
         rightArmVerticalDiff -= 45.0f * timeDiff;
     
     // Wrists
-    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_5) == GLFW_PRESS)
         leftWristVerticalDiff += 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_6) == GLFW_PRESS)
         leftWristVerticalDiff -= 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_7) == GLFW_PRESS)
         rightWristVerticalDiff += 45.0f * timeDiff;
-    if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_8) == GLFW_PRESS)
         rightWristVerticalDiff -= 45.0f * timeDiff;
     
     // Update all orientations
@@ -387,25 +387,25 @@ void updatePositions(float timeDiff) {
     zTrans = -torsoTranslationDiff * sinf(degreesToRadians(orientations.torsoHorizontal));
     
     // Update matrices
-    scene["Torso"]->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(xTrans, 0.0f, zTrans)) * scene["Torso"]->instance->transform.translate;
-    scene["Torso"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.torsoHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
+    _scene["Torso"]->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(xTrans, 0.0f, zTrans)) * _scene["Torso"]->instance->transform.translate;
+    _scene["Torso"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.torsoHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
     
-    scene["Torso"]->children["Head"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.headHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
-    scene["Torso"]->children["Head"]->instance->transform.rotate *= glm::rotate(glm::mat4(), orientations.headVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Head"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.headHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
+    _scene["Torso"]->children["Head"]->instance->transform.rotate *= glm::rotate(glm::mat4(), orientations.headVertical, glm::vec3(0.0f, 0.0f, 1.0f));
     
     if (cameraInHead) {
-        camera.offsetPosition(glm::vec3(xTrans, 0.0, zTrans));
-        camera.offsetOrientation(headVerticalDiff, - (torsoHorizontalDiff + headHorizontalDiff));
+        _camera.offsetPosition(glm::vec3(xTrans, 0.0, zTrans));
+        _camera.offsetOrientation(headVerticalDiff, - (torsoHorizontalDiff + headHorizontalDiff));
     }
     
-    scene["Torso"]->children["Left_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
-    scene["Torso"]->children["Left_Arm"]->children["Left_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
-    scene["Torso"]->children["Right_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
-    scene["Torso"]->children["Right_Arm"]->children["Right_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Left_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Left_Arm"]->children["Left_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Right_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Right_Arm"]->children["Right_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height) {
-    camera.setViewportAspectRatio((float) width / (float) height);
+    _camera.setViewportAspectRatio((float) width / (float) height);
 }
 
 void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -413,15 +413,15 @@ void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, 
         cameraInHead = !cameraInHead;
     
         if (cameraInHead) {
-            camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
-            camera.lookAt(glm::vec3(0, 2, -1));
-            camera.setPosition(glm::vec3(getCameraInHeadMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0)));
-            camera.offsetOrientation(orientations.headVertical, - (orientations.headHorizontal + orientations.torsoHorizontal - 90.0f));
+            _camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
+            _camera.lookAt(glm::vec3(0, 2, -1));
+            _camera.setPosition(glm::vec3(getCameraInHeadMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0)));
+            _camera.offsetOrientation(orientations.headVertical, - (orientations.headHorizontal + orientations.torsoHorizontal - 90.0f));
         }
         
         if (!cameraInHead) {
-            camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
-            camera.lookAt(glm::vec3(0, 2, -1));
+            _camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
+            _camera.lookAt(glm::vec3(0, 2, -1));
         }
     }
 }
@@ -441,17 +441,17 @@ void AppMain() {
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     
     // Create the window
-    window = glfwCreateWindow(initialScreenSize.x, initialScreenSize.y, "Robot", nullptr, nullptr);
-    if (!window) {
+    _window = glfwCreateWindow(initialScreenSize.x, initialScreenSize.y, "Robot", nullptr, nullptr);
+    if (!_window) {
         glfwTerminate();
         throw std::runtime_error("Error creating GLFW window");
     }
     
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPos(window, 0, 0);
-    glfwSetFramebufferSizeCallback(window, glfwFramebufferResizeCallbackFunc);
-    glfwSetKeyCallback(window, glfwKeyCallbackFunc);
-    glfwMakeContextCurrent(window);
+    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(_window, 0, 0);
+    glfwSetFramebufferSizeCallback(_window, glfwFramebufferResizeCallbackFunc);
+    glfwSetKeyCallback(_window, glfwKeyCallbackFunc);
+    glfwMakeContextCurrent(_window);
     
     // Initialize GLEW
     glewExperimental = GL_TRUE;
@@ -484,26 +484,26 @@ void AppMain() {
     createScene();
     
     // Orient camera
-    camera.setPosition(glm::vec3(0, 2, 0));
-    camera.lookAt(glm::vec3(0, 2, -1));
-    camera.setViewportAspectRatio(initialScreenSize.x / initialScreenSize.y);
-    camera.setNearAndFarPlanes(0.2f, 100.0f);
-    camera.setFieldOfView(65.0f);
+    _camera.setPosition(glm::vec3(0, 2, 0));
+    _camera.lookAt(glm::vec3(0, 2, -1));
+    _camera.setViewportAspectRatio(initialScreenSize.x / initialScreenSize.y);
+    _camera.setNearAndFarPlanes(0.2f, 100.0f);
+    _camera.setFieldOfView(65.0f);
     
-    lightSource.position = glm::vec4(5.0, 3.0, -2.0, 1.0);
-    lightSource.diffuseColor = glm::vec4(0.5);
-    lightSource.specularColor = glm::vec4(1.0);
-    lightSource.ambientColor = glm::vec4(1.5);
-    lightSource.attentuation = 1.2;
+    _lightSource.position = glm::vec4(5.0, 3.0, -2.0, 1.0);
+    _lightSource.diffuseColor = glm::vec4(0.5);
+    _lightSource.specularColor = glm::vec4(1.0);
+    _lightSource.ambientColor = glm::vec4(1.5);
+    _lightSource.attentuation = 1.2;
     
     double lastTime = glfwGetTime();
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(_window)) {
         double currentTime = glfwGetTime();
         updatePositions(currentTime - lastTime);
         lastTime = currentTime;
         
-        renderFrame(scene);
-        glfwSwapBuffers(window);
+        renderFrame(_scene);
+        glfwSwapBuffers(_window);
         
         GLenum error = glGetError();
         if (error != GL_NO_ERROR)
@@ -512,7 +512,7 @@ void AppMain() {
         glfwPollEvents();
     }
     
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(_window);
     glfwTerminate();
 }
 
