@@ -58,7 +58,7 @@ struct Orientations {
 };
 
 const glm::vec2 initialScreenSize(800, 600);
-Light light;
+Light lightSource;
 Camera camera;
 bool cameraInHead = false;
 GLFWwindow *window;
@@ -239,11 +239,11 @@ void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransfo
     shaders->setUniform("material.specular", model->specularColor);
     shaders->setUniform("material.shininess", model->shininess);
     
-    shaders->setUniform("light.position", light.position);
-    shaders->setUniform("light.diffuse", light.diffuseColor);
-    shaders->setUniform("light.specular", light.specularColor);
-    shaders->setUniform("light.ambient", light.ambientColor);
-    shaders->setUniform("light.attenuation", light.attentuation);
+    shaders->setUniform("light.position", lightSource.position);
+    shaders->setUniform("light.diffuse", lightSource.diffuseColor);
+    shaders->setUniform("light.specular", lightSource.specularColor);
+    shaders->setUniform("light.ambient", lightSource.ambientColor);
+    shaders->setUniform("light.attenuation", lightSource.attentuation);
     
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
@@ -305,9 +305,9 @@ void updatePositions(float timeDiff) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     
     if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
-        light.ambientColor += 0.1;
+        lightSource.ambientColor += 0.1;
     if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
-        light.ambientColor -= 0.1;
+        lightSource.ambientColor -= 0.1;
     
     if (!cameraInHead) {
         // Camera movement
@@ -490,11 +490,11 @@ void AppMain() {
     camera.setNearAndFarPlanes(0.2f, 100.0f);
     camera.setFieldOfView(65.0f);
     
-    light.position = glm::vec4(5.0, 3.0, -2.0, 1.0);
-    light.diffuseColor = glm::vec4(0.5);
-    light.specularColor = glm::vec4(1.0);
-    light.ambientColor = glm::vec4(1.5);
-    light.attentuation = 1.2;
+    lightSource.position = glm::vec4(5.0, 3.0, -2.0, 1.0);
+    lightSource.diffuseColor = glm::vec4(0.5);
+    lightSource.specularColor = glm::vec4(1.0);
+    lightSource.ambientColor = glm::vec4(1.5);
+    lightSource.attentuation = 1.2;
     
     double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {

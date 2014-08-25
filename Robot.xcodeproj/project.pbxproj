@@ -32,6 +32,7 @@
 		260D24D7199FBA9800AC2A21 /* brick_texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = brick_texture.jpg; sourceTree = "<group>"; };
 		260D24D8199FBA9800AC2A21 /* concrete_texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = concrete_texture.jpg; sourceTree = "<group>"; };
 		2651E55619A3DF4B00E423D5 /* RoomModel.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = RoomModel.obj; path = textures/RoomModel.obj; sourceTree = "<group>"; };
+		26A9157B19ABCA9900BCC1C8 /* Application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
 		26D82A5619A259DE00547694 /* MatrixStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixStack.cpp; sourceTree = "<group>"; };
 		26D82A5719A259DE00547694 /* MatrixStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MatrixStack.h; sourceTree = "<group>"; };
 		26D82A5919A2605C00547694 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
@@ -111,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				26EDF176199F4AB100C71FC5 /* main.mm */,
+				26A9157B19ABCA9900BCC1C8 /* Application.h */,
 				26D82BF419A396B700547694 /* Loaders.h */,
 				26D82A5B19A2634F00547694 /* RenderNode.h */,
 				26D82A5A19A260A200547694 /* Model.h */,

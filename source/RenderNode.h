@@ -14,12 +14,13 @@
 
 #include "Model.h"
 
-struct RenderNode {
-    ModelInstance *instance;
-    std::map<std::string, RenderNode *> children;
-    
+class RenderNode {
+public:
     RenderNode() : instance(nullptr), children() {}
     RenderNode(ModelInstance *instance) : instance(instance), children() {}
+    
+    ModelInstance *instance;
+    std::map<std::string, RenderNode *> children;
 };
 
 #endif
