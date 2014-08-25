@@ -45,7 +45,7 @@ struct Model {
     
     // Constructor
     Model() : shaders(nullptr), texture(nullptr),
-            vbo(0), nbo(0), vao(0), ebo(0),
+            vbo(0), tbo(0), nbo(0), vao(0), ebo(0),
             drawType(GL_TRIANGLES), drawStart(0), drawCount(0),
             ambientColor(1.0f), diffuseColor(1.0f), specularColor(1.0f), shininess(0.0f) {}
 };
