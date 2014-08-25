@@ -13,11 +13,16 @@
 #include <string>
 
 #include "Model.h"
+#include "Camera.h"
+#include "Light.h"
+#include "MatrixStack.h"
 
 class RenderNode {
 public:
-    RenderNode() : instance(nullptr), children() {}
-    RenderNode(ModelInstance *instance) : instance(instance), children() {}
+    RenderNode();
+    RenderNode(ModelInstance *instance);
+    
+    void renderRecursive(MatrixStack& modelTransform, Camera& cameraPosition, Light& lightSource);
     
     ModelInstance *instance;
     std::map<std::string, RenderNode *> children;

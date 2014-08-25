@@ -9,6 +9,7 @@
 #ifndef Robot_Loaders_h
 #define Robot_Loaders_h
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <string>
 #include <map>
 #include <fstream>
@@ -20,11 +21,22 @@
 #include "Bitmap.h"
 #include "Model.h"
 
+#define MAX_PATH_LEN 1024
+
 // returns the full path to the file `fileName` in the resources directory of the app bundle
 static std::string ResourcePath(std::string fileName) {
-    NSString* fname = [NSString stringWithCString:fileName.c_str() encoding:NSUTF8StringEncoding];
-    NSString* path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:fname];
-    return std::string([path cStringUsingEncoding:NSUTF8StringEncoding]);
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+    
+    char *path = new char[MAX_PATH_LEN];
+    CFURLGetFileSystemRepresentation(resourcesURL, TRUE, (UInt8 *) path, MAX_PATH_LEN);
+    
+    CFRelease(resourcesURL);
+    
+    std::string finalPath = std::string(path) + "/" + fileName;
+    delete[] path;
+    
+    return finalPath;
 }
 
 static ShaderProgram *programWithShaders(const char *vertexShaderFilename, const char *fragmentShaderFilename) {

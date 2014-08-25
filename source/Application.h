@@ -18,6 +18,23 @@ public:
 private:
     GLFWwindow *_window;
     std::map<std::string, RenderNode *> _scene;
+
+    struct Orientations {
+        float headHorizontal;
+        float headVertical;
+        
+        float torsoHorizontal;
+        
+        float leftArmVertical;
+        float leftWristVertical;
+        
+        float rightArmVertical;
+        float rightWristVertical;
+        
+        Orientations() : headHorizontal(0), headVertical(0), torsoHorizontal(0),
+        leftArmVertical(0), leftWristVertical(0), rightArmVertical(0), rightWristVertical(0) {}
+    } _robotOrientations;
+    
     Camera _camera;
     Light _lightSource;
     

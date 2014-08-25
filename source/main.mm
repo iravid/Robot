@@ -6,7 +6,6 @@
 //
 //
 
-#import <Foundation/Foundation.h>
 #include <iostream>
 #include <list>
 #include <string>
@@ -63,7 +62,7 @@ Camera _camera;
 bool cameraInHead = false;
 GLFWwindow *_window;
 std::map<std::string, RenderNode *> _scene;
-Orientations orientations;
+Orientations _robotOrientations;
 
 static Model *loadModel(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
                         GLenum drawType, GLuint drawCount, GLuint drawStart,
@@ -121,30 +120,30 @@ static std::map<std::string, Model *> loadRoomModels() {
     std::map<std::string, Model *> roomModels;
     
     // Ceiling and floor
-    roomModels["Ceiling"] = loadModel(roomData["Ceiling"].vertexData, roomData["Ceiling"].textureData, roomData["Ceiling"].normalData, roomData["Ceiling"].indexData,
+    roomModels["Ceiling"] = new Model(roomData["Ceiling"].vertexData, roomData["Ceiling"].textureData, roomData["Ceiling"].normalData, roomData["Ceiling"].indexData,
                                        GL_TRIANGLES, (GLuint) roomData["Ceiling"].indexData.size(), 0,
                                       glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 40.0f,
                                        "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
-    roomModels["Floor"] = loadModel(roomData["Floor"].vertexData, roomData["Floor"].textureData, roomData["Floor"].normalData, roomData["Floor"].indexData,
+    roomModels["Floor"] = new Model(roomData["Floor"].vertexData, roomData["Floor"].textureData, roomData["Floor"].normalData, roomData["Floor"].indexData,
                                       GL_TRIANGLES, (GLuint) roomData["Floor"].indexData.size(), 0,
                                       glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 40.0f,
                                       "concrete_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
     
     // Walls
-    roomModels["Left_Wall"] = loadModel(roomData["Left_Wall"].vertexData, roomData["Left_Wall"].textureData, roomData["Left_Wall"].normalData, roomData["Left_Wall"].indexData,
+    roomModels["Left_Wall"] = new Model(roomData["Left_Wall"].vertexData, roomData["Left_Wall"].textureData, roomData["Left_Wall"].normalData, roomData["Left_Wall"].indexData,
                                     GL_TRIANGLES, (GLuint) roomData["Left_Wall"].indexData.size(), 0,
                                       glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                     "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
-    roomModels["Right_Wall"] = loadModel(roomData["Right_Wall"].vertexData, roomData["Right_Wall"].textureData, roomData["Right_Wall"].normalData, roomData["Right_Wall"].indexData,
+    roomModels["Right_Wall"] = new Model(roomData["Right_Wall"].vertexData, roomData["Right_Wall"].textureData, roomData["Right_Wall"].normalData, roomData["Right_Wall"].indexData,
                                         GL_TRIANGLES, (GLuint) roomData["Right_Wall"].indexData.size(), 0,
                                       glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
-    roomModels["Front_Wall"] = loadModel(roomData["Front_Wall"].vertexData, roomData["Front_Wall"].textureData, roomData["Front_Wall"].normalData, roomData["Front_Wall"].indexData,
+    roomModels["Front_Wall"] = new Model(roomData["Front_Wall"].vertexData, roomData["Front_Wall"].textureData, roomData["Front_Wall"].normalData, roomData["Front_Wall"].indexData,
                                         GL_TRIANGLES, (GLuint) roomData["Front_Wall"].indexData.size(), 0,
                                       glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
-    roomModels["Back_Wall"] = loadModel(roomData["Back_Wall"].vertexData, roomData["Back_Wall"].textureData, roomData["Back_Wall"].normalData, roomData["Back_Wall"].indexData,
+    roomModels["Back_Wall"] = new Model(roomData["Back_Wall"].vertexData, roomData["Back_Wall"].textureData, roomData["Back_Wall"].normalData, roomData["Back_Wall"].indexData,
                                         GL_TRIANGLES, (GLuint) roomData["Back_Wall"].indexData.size(), 0,
                                       glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 20.0f,
                                         "brick_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
@@ -158,7 +157,7 @@ static std::map<std::string, Model *> loadRobotModels() {
     std::map<std::string, Model *> robotModels;
     
     for (std::map<std::string, ModelData>::const_iterator it = robotData.begin(); it != robotData.end(); ++it) {
-        Model *model = loadModel(it->second.vertexData, it->second.textureData, it->second.normalData, it->second.indexData,
+        Model *model = new Model(it->second.vertexData, it->second.textureData, it->second.normalData, it->second.indexData,
                                  GL_TRIANGLES, 36, 0,
                                  glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 120.0f,
                                  "metal_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
@@ -220,60 +219,6 @@ static void createScene() {
     _scene["Torso"] = torsoNode;
 }
 
-// Render a single instance
-void renderInstance(const ModelInstance& instance, const glm::mat4& modelTransform) {
-    Model *model = instance.model;
-    ShaderProgram *shaders = model->shaders;
-    
-    // Start using the shader program
-    shaders->use();
-    
-    // Set the uniforms
-    shaders->setUniform("model", modelTransform);
-    shaders->setUniform("view", _camera.view());
-    shaders->setUniform("projection", _camera.projection());
-    
-    shaders->setUniform("materialTexture", 0);
-    shaders->setUniform("material.ambient", model->ambientColor);
-    shaders->setUniform("material.diffuse", model->diffuseColor);
-    shaders->setUniform("material.specular", model->specularColor);
-    shaders->setUniform("material.shininess", model->shininess);
-    
-    shaders->setUniform("light.position", _lightSource.position);
-    shaders->setUniform("light.diffuse", _lightSource.diffuseColor);
-    shaders->setUniform("light.specular", _lightSource.specularColor);
-    shaders->setUniform("light.ambient", _lightSource.ambientColor);
-    shaders->setUniform("light.attenuation", _lightSource.attentuation);
-    
-    // Bind texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, model->texture->handle());
-    
-    // Bind VAO and draw
-    glBindVertexArray(model->vao);
-    glDrawElements(model->drawType, model->drawCount, GL_UNSIGNED_INT, 0);
-    
-    // Unbind everything
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    shaders->stopUsing();
-}
-
-void renderRecursive(const RenderNode *node, MatrixStack& modelTransformStack) {
-    modelTransformStack.push(node->instance->transform.matrix());
-    
-    // Render all children recursively
-    std::map<std::string, RenderNode *>::const_iterator it;
-    for (it = node->children.begin(); it != node->children.end(); ++it)
-        renderRecursive(it->second, modelTransformStack);
-    
-    // Render this instance
-    renderInstance(*(node->instance), modelTransformStack.multiplyMatrices());
-    
-    // Pop the matrices
-    modelTransformStack.pop();
-}
-
 void renderFrame(const std::map<std::string, RenderNode *>& scene) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -282,7 +227,7 @@ void renderFrame(const std::map<std::string, RenderNode *>& scene) {
     
     std::map<std::string, RenderNode *>::const_iterator it;
     for (it = scene.begin(); it != scene.end(); ++it)
-        renderRecursive(it->second, matrixStack);
+        it->second->renderRecursive(matrixStack, _camera, _lightSource);
 }
 
 static void glfwErrorCallbackFunc(int error, const char *desc) {
@@ -369,39 +314,39 @@ void updatePositions(float timeDiff) {
         rightWristVerticalDiff -= 45.0f * timeDiff;
     
     // Update all orientations
-    orientations.torsoHorizontal += torsoHorizontalDiff;
+    _robotOrientations.torsoHorizontal += torsoHorizontalDiff;
     
-    orientations.torsoHorizontal = fmodf(orientations.torsoHorizontal, 360.0f);
-    if (orientations.torsoHorizontal < 0.0f)
-        orientations.torsoHorizontal += 360.0f;
+    _robotOrientations.torsoHorizontal = fmodf(_robotOrientations.torsoHorizontal, 360.0f);
+    if (_robotOrientations.torsoHorizontal < 0.0f)
+        _robotOrientations.torsoHorizontal += 360.0f;
     
-    orientations.headHorizontal += headHorizontalDiff;
-    orientations.headVertical = clampToMaxVertical(orientations.headVertical, headVerticalDiff);
-    orientations.leftArmVertical = clampToMaxVertical(orientations.leftArmVertical, leftArmVerticalDiff);
-    orientations.leftWristVertical = clampToMaxVertical(orientations.leftWristVertical, leftWristVerticalDiff);
-    orientations.rightArmVertical = clampToMaxVertical(orientations.rightArmVertical, rightArmVerticalDiff);
-    orientations.rightWristVertical = clampToMaxVertical(orientations.rightWristVertical, rightWristVerticalDiff);
+    _robotOrientations.headHorizontal += headHorizontalDiff;
+    _robotOrientations.headVertical = clampToMaxVertical(_robotOrientations.headVertical, headVerticalDiff);
+    _robotOrientations.leftArmVertical = clampToMaxVertical(_robotOrientations.leftArmVertical, leftArmVerticalDiff);
+    _robotOrientations.leftWristVertical = clampToMaxVertical(_robotOrientations.leftWristVertical, leftWristVerticalDiff);
+    _robotOrientations.rightArmVertical = clampToMaxVertical(_robotOrientations.rightArmVertical, rightArmVerticalDiff);
+    _robotOrientations.rightWristVertical = clampToMaxVertical(_robotOrientations.rightWristVertical, rightWristVerticalDiff);
     
     float xTrans, zTrans;
-    xTrans = torsoTranslationDiff * cosf(degreesToRadians(orientations.torsoHorizontal));
-    zTrans = -torsoTranslationDiff * sinf(degreesToRadians(orientations.torsoHorizontal));
+    xTrans = torsoTranslationDiff * cosf(degreesToRadians(_robotOrientations.torsoHorizontal));
+    zTrans = -torsoTranslationDiff * sinf(degreesToRadians(_robotOrientations.torsoHorizontal));
     
     // Update matrices
     _scene["Torso"]->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(xTrans, 0.0f, zTrans)) * _scene["Torso"]->instance->transform.translate;
-    _scene["Torso"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.torsoHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
+    _scene["Torso"]->instance->transform.rotate = glm::rotate(glm::mat4(), _robotOrientations.torsoHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
     
-    _scene["Torso"]->children["Head"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.headHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
-    _scene["Torso"]->children["Head"]->instance->transform.rotate *= glm::rotate(glm::mat4(), orientations.headVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Head"]->instance->transform.rotate = glm::rotate(glm::mat4(), _robotOrientations.headHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
+    _scene["Torso"]->children["Head"]->instance->transform.rotate *= glm::rotate(glm::mat4(), _robotOrientations.headVertical, glm::vec3(0.0f, 0.0f, 1.0f));
     
     if (cameraInHead) {
         _camera.offsetPosition(glm::vec3(xTrans, 0.0, zTrans));
         _camera.offsetOrientation(headVerticalDiff, - (torsoHorizontalDiff + headHorizontalDiff));
     }
     
-    _scene["Torso"]->children["Left_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
-    _scene["Torso"]->children["Left_Arm"]->children["Left_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.leftWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
-    _scene["Torso"]->children["Right_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
-    _scene["Torso"]->children["Right_Arm"]->children["Right_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), orientations.rightWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Left_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), _robotOrientations.leftArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Left_Arm"]->children["Left_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), _robotOrientations.leftWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Right_Arm"]->instance->transform.rotate = glm::rotate(glm::mat4(), _robotOrientations.rightArmVertical, glm::vec3(0.0f, 0.0f, 1.0f));
+    _scene["Torso"]->children["Right_Arm"]->children["Right_Wrist"]->instance->transform.rotate = glm::rotate(glm::mat4(), _robotOrientations.rightWristVertical, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height) {
@@ -416,7 +361,7 @@ void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, 
             _camera.setPosition(glm::vec3(0.0, 2.0, 0.0));
             _camera.lookAt(glm::vec3(0, 2, -1));
             _camera.setPosition(glm::vec3(getCameraInHeadMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0)));
-            _camera.offsetOrientation(orientations.headVertical, - (orientations.headHorizontal + orientations.torsoHorizontal - 90.0f));
+            _camera.offsetOrientation(_robotOrientations.headVertical, - (_robotOrientations.headHorizontal + _robotOrientations.torsoHorizontal - 90.0f));
         }
         
         if (!cameraInHead) {

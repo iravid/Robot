@@ -13,6 +13,8 @@
 
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include "Camera.h"
+#include "Light.h"
 
 struct ModelData {
     std::vector<glm::vec3> vertexData;
@@ -21,7 +23,17 @@ struct ModelData {
     std::vector<GLuint> indexData;
 };
 
-struct Model {
+struct ModelTransform {
+    glm::mat4 scale;
+    glm::mat4 rotate;
+    glm::mat4 translate;
+    
+    ModelTransform() : scale(), rotate(), translate() {}
+    glm::mat4 matrix() const { return translate * rotate * scale; }
+};
+
+class Model {
+public:
     ShaderProgram *shaders;
     Texture *texture;
     
@@ -41,32 +53,30 @@ struct Model {
     glm::vec4 diffuseColor;
     glm::vec4 specularColor;
     GLfloat shininess;
-
     
-    // Constructor
-    Model() : shaders(nullptr), texture(nullptr),
-            vbo(0), tbo(0), nbo(0), vao(0), ebo(0),
-            drawType(GL_TRIANGLES), drawStart(0), drawCount(0),
-            ambientColor(1.0f), diffuseColor(1.0f), specularColor(1.0f), shininess(0.0f) {}
+    Model();
+    Model(GLenum drawType, GLuint drawCount, GLuint drawStart,
+          glm::vec4 ambientColor, glm::vec4 diffuseColor, glm::vec4 specularColor, GLfloat shininess,
+          const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath);
+    Model(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
+          GLenum drawType, GLuint drawCount, GLuint drawStart,
+          glm::vec4 ambientColor, glm::vec4 diffuseColor, glm::vec4 specularColor, GLfloat shininess,
+          const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath);
+    void loadData(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData);
+private:
+    void genBuffers();
 };
 
-struct ModelTransform {
-    glm::mat4 scale;
-    glm::mat4 rotate;
-    glm::mat4 translate;
-    
-    ModelTransform() : scale(), rotate(), translate() {}
-    glm::mat4 matrix() const { return translate * rotate * scale; }
-};
-
-struct ModelInstance {
+class ModelInstance {
+public:
     // The model itself
     Model *model;
     // The transformation to be applied to this instance
     ModelTransform transform;
     
-    ModelInstance() : model(nullptr), transform() {}
-    ModelInstance(Model *model) : model(model), transform() {}
+    ModelInstance();
+    ModelInstance(Model *model);
+    void render(const glm::mat4 transform, Camera& cameraPosition, Light& lightSource);
 };
 
 #endif
