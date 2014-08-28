@@ -34,6 +34,7 @@ Model::Model(const std::vector<glm::vec3>& vertexData, const std::vector<glm::ve
      drawType(drawType), drawCount(drawCount), drawStart(drawStart),
      ambientColor(ambientColor), diffuseColor(diffuseColor), specularColor(specularColor), shininess(shininess),
      shaders(programWithShaders(vertexShaderPath, fragmentShaderPath)), texture(textureFromFile(texturePath)) {
+     genBuffers();
     loadData(vertexData, textureData, normalData, elementData);
 }
 
