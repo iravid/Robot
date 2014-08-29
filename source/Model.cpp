@@ -21,9 +21,9 @@ Model::Model(GLenum drawType, GLuint drawCount, GLuint drawStart,
                 glm::vec4 ambientColor, glm::vec4 diffuseColor, glm::vec4 specularColor, GLfloat shininess,
                 const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath) :
                 drawType(drawType), drawCount(drawCount), drawStart(drawStart),
-                ambientColor(ambientColor), diffuseColor(diffuseColor), specularColor(specularColor), shininess(shininess),
-                shaders(programWithShaders(vertexShaderPath, fragmentShaderPath)), texture(textureFromFile(texturePath)) {
-    // Create buffers
+                ambientColor(ambientColor), diffuseColor(diffuseColor), specularColor(specularColor), shininess(shininess) {
+    shaders = programWithShaders(vertexShaderPath, fragmentShaderPath);
+    texture = textureFromFile(texturePath);
     genBuffers();
 }
 
@@ -32,9 +32,10 @@ Model::Model(const std::vector<glm::vec3>& vertexData, const std::vector<glm::ve
      glm::vec4 ambientColor, glm::vec4 diffuseColor, glm::vec4 specularColor, GLfloat shininess,
      const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath) :
      drawType(drawType), drawCount(drawCount), drawStart(drawStart),
-     ambientColor(ambientColor), diffuseColor(diffuseColor), specularColor(specularColor), shininess(shininess),
-     shaders(programWithShaders(vertexShaderPath, fragmentShaderPath)), texture(textureFromFile(texturePath)) {
-     genBuffers();
+     ambientColor(ambientColor), diffuseColor(diffuseColor), specularColor(specularColor), shininess(shininess) {
+    shaders = programWithShaders(vertexShaderPath, fragmentShaderPath);
+    texture = textureFromFile(texturePath);
+    genBuffers();
     loadData(vertexData, textureData, normalData, elementData);
 }
 
@@ -76,11 +77,9 @@ void Model::loadData(const std::vector<glm::vec3>& vertexData, const std::vector
     glBindVertexArray(0);
 }
 
-ModelInstance::ModelInstance() : model(nullptr), transform() {
-}
+ModelInstance::ModelInstance() : model(nullptr), transform() {}
 
-ModelInstance::ModelInstance(Model *model) : model(model), transform() {
-}
+ModelInstance::ModelInstance(Model *model) : model(model), transform() {}
 
 void ModelInstance::render(const glm::mat4 transform, Camera& cameraPosition, Light& lightSource) {
     ShaderProgram *shaders = model->shaders;
@@ -103,7 +102,7 @@ void ModelInstance::render(const glm::mat4 transform, Camera& cameraPosition, Li
     shaders->setUniform("light.diffuse", lightSource.diffuseColor);
     shaders->setUniform("light.specular", lightSource.specularColor);
     shaders->setUniform("light.ambient", lightSource.ambientColor);
-    shaders->setUniform("light.attenuation", lightSource.attentuation);
+    shaders->setUniform("light.attenuation", lightSource.attenuation);
     
     // Bind texture
     glActiveTexture(GL_TEXTURE0);

@@ -12,6 +12,7 @@
 		2651E55719A3DF4B00E423D5 /* RoomModel.obj in Resources */ = {isa = PBXBuildFile; fileRef = 2651E55619A3DF4B00E423D5 /* RoomModel.obj */; };
 		26A9157D19ABCF6300BCC1C8 /* RenderNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A9157C19ABCF6300BCC1C8 /* RenderNode.cpp */; };
 		26A9157F19ABD56600BCC1C8 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A9157E19ABD56600BCC1C8 /* Model.cpp */; };
+		26A9158119B06CA900BCC1C8 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A9158019B06CA900BCC1C8 /* Application.cpp */; };
 		26D82A5819A259DE00547694 /* MatrixStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D82A5619A259DE00547694 /* MatrixStack.cpp */; };
 		26D82A5D19A2686300547694 /* metal_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 26D82A5C19A2686300547694 /* metal_texture.jpg */; };
 		26D82BF219A3958000547694 /* RobotModel.obj in Resources */ = {isa = PBXBuildFile; fileRef = 26D82BF119A3958000547694 /* RobotModel.obj */; };
@@ -37,6 +38,8 @@
 		26A9157B19ABCA9900BCC1C8 /* Application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
 		26A9157C19ABCF6300BCC1C8 /* RenderNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderNode.cpp; sourceTree = "<group>"; };
 		26A9157E19ABD56600BCC1C8 /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model.cpp; sourceTree = "<group>"; };
+		26A9158019B06CA900BCC1C8 /* Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
+		26A9158219B0752100BCC1C8 /* MathUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
 		26D82A5619A259DE00547694 /* MatrixStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixStack.cpp; sourceTree = "<group>"; };
 		26D82A5719A259DE00547694 /* MatrixStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MatrixStack.h; sourceTree = "<group>"; };
 		26D82A5919A2605C00547694 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
@@ -117,6 +120,8 @@
 			children = (
 				26EDF176199F4AB100C71FC5 /* main.mm */,
 				26A9157B19ABCA9900BCC1C8 /* Application.h */,
+				26A9158019B06CA900BCC1C8 /* Application.cpp */,
+				26A9158219B0752100BCC1C8 /* MathUtils.h */,
 				26D82BF419A396B700547694 /* Loaders.h */,
 				26D82A5B19A2634F00547694 /* RenderNode.h */,
 				26A9157C19ABCF6300BCC1C8 /* RenderNode.cpp */,
@@ -232,6 +237,7 @@
 			files = (
 				26A9157F19ABD56600BCC1C8 /* Model.cpp in Sources */,
 				26E1E351199F950400197739 /* Texture.cpp in Sources */,
+				26A9158119B06CA900BCC1C8 /* Application.cpp in Sources */,
 				26E1E34E199F8D3100197739 /* Bitmap.cpp in Sources */,
 				26EDF1C5199F676500C71FC5 /* ShaderProgram.cpp in Sources */,
 				26D82A5819A259DE00547694 /* MatrixStack.cpp in Sources */,

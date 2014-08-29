@@ -21,9 +21,9 @@ struct Light {
     // Ambience color
     glm::vec4 ambientColor;
     // Attentuation coefficient
-    float attentuation;
+    float attenuation;
     
-    Light() : position(0, 0, 0, 1), diffuseColor(1.0f), specularColor(1.0f), ambientColor(1.0f), attentuation(0.02f) {}
+    Light() : position(0, 0, 0, 1), diffuseColor(1.0f), specularColor(1.0f), ambientColor(1.0f), attenuation(0.02f) {}
 };
 
 #endif

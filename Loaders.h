@@ -23,7 +23,7 @@
 
 #define MAX_PATH_LEN 1024
 
-// returns the full path to the file `fileName` in the resources directory of the app bundle
+// Returns the path to the resource file
 static std::string ResourcePath(std::string fileName) {
     CFBundleRef mainBundle = CFBundleGetMainBundle();
     CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
