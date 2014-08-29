@@ -410,5 +410,5 @@ void Application::initLightSource(glm::vec3 position, glm::vec4 diffuseColor, gl
     _lightSource.diffuseColor = diffuseColor;
     _lightSource.specularColor = specularColor;
     _lightSource.ambientColor = ambientColor;
-    _lightSource.attentuation = attenuation;
+    _lightSource.attenuation = attenuation;
 }
