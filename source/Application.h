@@ -45,10 +45,17 @@ private:
     void glfwKeyCallbackFunc(GLFWwindow *window, int key, int scancode, int action, int mods);
     void glfwFramebufferResizeCallbackFunc(GLFWwindow *window, int width, int height);
     
+    // Initialization functions
     void initGlfw();
     void initCamera();
     void initLightSource();
     
+    // Loading functions
+    void createScene();
+    void loadRobotModels();
+    void loadRoomModels();
+    
+    // Rendering pipeline
     void updatePositions();
     void renderFrame();
 }

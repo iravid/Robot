@@ -64,57 +64,6 @@ GLFWwindow *_window;
 std::map<std::string, RenderNode *> _scene;
 Orientations _robotOrientations;
 
-static Model *loadModel(const std::vector<glm::vec3>& vertexData, const std::vector<glm::vec2>& textureData, const std::vector<glm::vec3>& normalData, const std::vector<GLuint>& elementData,
-                        GLenum drawType, GLuint drawCount, GLuint drawStart,
-                        glm::vec4 ambientColor, glm::vec4 diffuseColor, glm::vec4 specularColor, GLfloat shininess,
-                        const char *texturePath, const char *vertexShaderPath, const char *fragmentShaderPath) {
-    Model *model = new Model();
-    model->shaders = programWithShaders(vertexShaderPath, fragmentShaderPath);
-    model->drawType = drawType;
-    model->drawCount = drawCount;
-    model->drawStart = drawStart;
-    model->shininess = shininess;
-    model->specularColor = specularColor;
-    model->texture = textureFromFile(texturePath);
-    
-    // Create buffers
-    glGenBuffers(1, &model->vbo);
-    glGenBuffers(1, &model->nbo);
-    glGenBuffers(1, &model->tbo);
-    glGenVertexArrays(1, &model->vao);
-    glGenBuffers(1, &model->ebo);
-    
-    // Bind array
-    glBindVertexArray(model->vao);
-    
-    // Load the vertex data.
-    glBindBuffer(GL_ARRAY_BUFFER, model->vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(glm::vec3), &vertexData[0], GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(model->shaders->attrib("vert"));
-    glVertexAttribPointer(model->shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, model->tbo);
-    glBufferData(GL_ARRAY_BUFFER, textureData.size() * sizeof(glm::vec2), &textureData[0], GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(model->shaders->attrib("vertTextureCoord"));
-    glVertexAttribPointer(model->shaders->attrib("vertTextureCoord"), 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
-    
-    // Load the normal data
-    glBindBuffer(GL_ARRAY_BUFFER, model->nbo);
-    glBufferData(GL_ARRAY_BUFFER, normalData.size() * sizeof(glm::vec3), &normalData[0], GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(model->shaders->attrib("vertNormal"));
-    glVertexAttribPointer(model->shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementData.size() * sizeof(GLuint), &elementData[0], GL_STATIC_DRAW);
-    
-    glBindVertexArray(0);
-    
-    return model;
-}
-
 static std::map<std::string, Model *> loadRoomModels() {
     std::map<std::string, ModelData> roomData = loadModelsFromObj("RoomModel.obj");
     std::map<std::string, Model *> roomModels;
