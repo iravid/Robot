@@ -88,6 +88,18 @@ std::map<std::string, Model *> Application::loadRoomModels() {
     return roomModels;
 }
 
+std::map<std::string, Model *> Application::loadFurnitureModels() {
+    std::map<std::string, ModelData> furnitureData = loadModelsFromObj("BrownObjectModel.obj");
+    std::map<std::string, Model *> furnitureModels;
+    
+    furnitureModels["Cylinder"] = new Model(furnitureData["Cylinder"].vertexData, furnitureData["Cylinder"].textureData, furnitureData["Cylinder"].normalData, furnitureData["Cylinder"].indexData,
+                                            GL_TRIANGLES, (GLuint) furnitureData["Cylinder"].indexData.size(), 0,
+                                            glm::vec4(1.0f), glm::vec4(1.0f), glm::vec4(1.0f), 40.0f,
+                                            "brown_texture.jpg", "vertex-shader.vsh", "fragment-shader.fsh");
+    
+    return furnitureModels;
+}
+
 std::map<std::string, Model *> Application::loadRobotModels() {
     // Load the arrays from the file
     std::map<std::string, ModelData> robotData = loadModelsFromObj("RobotModel.obj");
@@ -120,6 +132,14 @@ void Application::createScene() {
     _scene["Front_Wall"] = frontWallNode;
     RenderNode *backWallNode = new RenderNode(new ModelInstance(roomModels["Back_Wall"]));
     _scene["Back_Wall"] = backWallNode;
+    
+    // Load the furniture models
+    std::map<std::string, Model *> furnitureModels = loadFurnitureModels();
+    
+    RenderNode *furnitureNode = new RenderNode(new ModelInstance(furnitureModels["Cylinder"]));
+    furnitureNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(1, 0, 3));
+    
+    _scene["Cylinder"] = furnitureNode;
     
     // Load the robot models
     std::map<std::string, Model *> robotModels = loadRobotModels();

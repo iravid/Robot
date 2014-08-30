@@ -75,6 +75,7 @@ private:
     // Loading functions
     void createScene();
     std::map<std::string, Model *> loadRobotModels();
+    std::map<std::string, Model *> loadFurnitureModels();
     std::map<std::string, Model *> loadRoomModels();
     
     // Rendering pipeline

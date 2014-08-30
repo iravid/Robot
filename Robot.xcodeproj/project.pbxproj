@@ -13,6 +13,8 @@
 		26A9157D19ABCF6300BCC1C8 /* RenderNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A9157C19ABCF6300BCC1C8 /* RenderNode.cpp */; };
 		26A9157F19ABD56600BCC1C8 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A9157E19ABD56600BCC1C8 /* Model.cpp */; };
 		26A9158119B06CA900BCC1C8 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A9158019B06CA900BCC1C8 /* Application.cpp */; };
+		26A9158419B279DC00BCC1C8 /* BrownObjectModel.obj in Resources */ = {isa = PBXBuildFile; fileRef = 26A9158319B279DC00BCC1C8 /* BrownObjectModel.obj */; };
+		26A9158619B27ACE00BCC1C8 /* brown_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 26A9158519B27ACE00BCC1C8 /* brown_texture.jpg */; };
 		26D82A5819A259DE00547694 /* MatrixStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D82A5619A259DE00547694 /* MatrixStack.cpp */; };
 		26D82A5D19A2686300547694 /* metal_texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 26D82A5C19A2686300547694 /* metal_texture.jpg */; };
 		26D82BF219A3958000547694 /* RobotModel.obj in Resources */ = {isa = PBXBuildFile; fileRef = 26D82BF119A3958000547694 /* RobotModel.obj */; };
@@ -40,6 +42,8 @@
 		26A9157E19ABD56600BCC1C8 /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model.cpp; sourceTree = "<group>"; };
 		26A9158019B06CA900BCC1C8 /* Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
 		26A9158219B0752100BCC1C8 /* MathUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
+		26A9158319B279DC00BCC1C8 /* BrownObjectModel.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = BrownObjectModel.obj; path = textures/BrownObjectModel.obj; sourceTree = "<group>"; };
+		26A9158519B27ACE00BCC1C8 /* brown_texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = brown_texture.jpg; sourceTree = "<group>"; };
 		26D82A5619A259DE00547694 /* MatrixStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixStack.cpp; sourceTree = "<group>"; };
 		26D82A5719A259DE00547694 /* MatrixStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MatrixStack.h; sourceTree = "<group>"; };
 		26D82A5919A2605C00547694 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
@@ -88,6 +92,7 @@
 		260D24D6199FBA9800AC2A21 /* textures */ = {
 			isa = PBXGroup;
 			children = (
+				26A9158519B27ACE00BCC1C8 /* brown_texture.jpg */,
 				26D82A5C19A2686300547694 /* metal_texture.jpg */,
 				260D24D7199FBA9800AC2A21 /* brick_texture.jpg */,
 				260D24D8199FBA9800AC2A21 /* concrete_texture.jpg */,
@@ -159,6 +164,7 @@
 		26EDF1BB199F568D00C71FC5 /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				26A9158319B279DC00BCC1C8 /* BrownObjectModel.obj */,
 				26D82BF119A3958000547694 /* RobotModel.obj */,
 				26EDF1BC199F56A900C71FC5 /* fragment-shader.fsh */,
 				2651E55619A3DF4B00E423D5 /* RoomModel.obj */,
@@ -218,11 +224,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26A9158619B27ACE00BCC1C8 /* brown_texture.jpg in Resources */,
 				26D82A5D19A2686300547694 /* metal_texture.jpg in Resources */,
 				26EDF1BD199F56A900C71FC5 /* fragment-shader.fsh in Resources */,
 				26D82BF219A3958000547694 /* RobotModel.obj in Resources */,
 				26EDF1BF199F56B400C71FC5 /* vertex-shader.vsh in Resources */,
 				260D24DA199FBA9800AC2A21 /* concrete_texture.jpg in Resources */,
+				26A9158419B279DC00BCC1C8 /* BrownObjectModel.obj in Resources */,
 				260D24D9199FBA9800AC2A21 /* brick_texture.jpg in Resources */,
 				2651E55719A3DF4B00E423D5 /* RoomModel.obj in Resources */,
 			);
