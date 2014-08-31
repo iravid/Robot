@@ -136,10 +136,17 @@ void Application::createScene() {
     // Load the furniture models
     std::map<std::string, Model *> furnitureModels = loadFurnitureModels();
     
-    RenderNode *furnitureNode = new RenderNode(new ModelInstance(furnitureModels["Cylinder"]));
-    furnitureNode->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(1, 0, 3));
-    
-    _scene["Cylinder"] = furnitureNode;
+    RenderNode *furniture1Node = new RenderNode(new ModelInstance(furnitureModels["Cylinder"]));
+    furniture1Node->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(3, -0.5, 4));
+    _scene["Cylinder1"] = furniture1Node;
+
+    RenderNode *furniture2Node = new RenderNode(new ModelInstance(furnitureModels["Cylinder"]));
+    furniture2Node->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(3, -0.5, -4));
+    _scene["Cylinder2"] = furniture2Node;
+
+    RenderNode *furniture3Node = new RenderNode(new ModelInstance(furnitureModels["Cylinder"]));
+    furniture3Node->instance->transform.translate = glm::translate(glm::mat4(), glm::vec3(-3, -0.5, -4));
+    _scene["Cylinder3"] = furniture3Node;
     
     // Load the robot models
     std::map<std::string, Model *> robotModels = loadRobotModels();
