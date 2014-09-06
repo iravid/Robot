@@ -26,7 +26,6 @@ void RenderNode::renderRecursive(MatrixStack& modelTransformStack, Camera& camer
         it->second->renderRecursive(modelTransformStack, cameraPosition, lightSource);
     
     // Render this instance
-    //renderInstance(*(node->instance), modelTransformStack.multiplyMatrices());
     instance->render(modelTransformStack.multiplyMatrices(), cameraPosition, lightSource);
     
     // Pop the matrices

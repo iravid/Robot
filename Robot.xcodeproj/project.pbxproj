@@ -140,11 +140,11 @@
 				26EDF1C0199F598E00C71FC5 /* Shader.cpp */,
 				26EDF1C1199F598E00C71FC5 /* Shader.h */,
 				26EDF1C3199F676500C71FC5 /* ShaderProgram.cpp */,
-				26E1E34C199F8D3100197739 /* Bitmap.cpp */,
+				26EDF1C4199F676500C71FC5 /* ShaderProgram.h */,
 				26E1E34F199F950400197739 /* Texture.cpp */,
 				26E1E350199F950400197739 /* Texture.h */,
+				26E1E34C199F8D3100197739 /* Bitmap.cpp */,
 				26E1E34D199F8D3100197739 /* Bitmap.h */,
-				26EDF1C4199F676500C71FC5 /* ShaderProgram.h */,
 			);
 			path = source;
 			sourceTree = "<group>";
